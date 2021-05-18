@@ -1,12 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import MainPage from './mainPage';
+import GamePage from './game';
+import { HashRouter, Route, Redirect } from 'react-router-dom';
 //import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <HashRouter>
+      <Route path="/" exact component={MainPage}></Route>
+      <Route path="/game/:param" exact component={GamePage}></Route>
+      <Redirect to="/" from='*'/>
+    </HashRouter>
   </React.StrictMode>,
   document.getElementById('root')
 );
