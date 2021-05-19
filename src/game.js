@@ -14,16 +14,34 @@ export default class GamePage extends Component{
     startGame=()=>{
         let board=[],width=this.state.width,height=this.state.height;
         for(let row=0;row<height;row++){
-            let arr=[];
+            let array=[];
             for(let col=0;col<width;col++){
-                arr.push(0);
+                array.push({
+                    key:Math.random(),
+                    row,
+                    col,
+                    value:0
+                });
             }
-            board.push(arr);
+            board.push({
+                key:Math.random(),
+                data:array
+            });
         }
         this.setState({
             board
         });
-        console.log('board',board,this.state);
+    }
+    handleDig=(data)=>{
+        this.setState(state=>{
+            let board=state.board;
+            board[data.row].data[data.col].value |= 0x80;
+            return{
+                ...state,
+                board
+            }
+        });
+
     }
     componentWillMount(){
         let [width,height,mines]=this.props.match.params.param.split(',');
@@ -42,9 +60,9 @@ export default class GamePage extends Component{
                 游戏页面
                 <div className='gamePad'>
                     {
-                        this.state.board.map(row=><div class='gamePadRow'>
+                        this.state.board.map(row=><div className='gamePadRow' key={row.key}>
                             {
-                                row.map(cell=><Cell data={cell}></Cell>)
+                                row.data.map(cell=><Cell data={cell} key={cell.key} onDig={this.handleDig}></Cell>)
                             }
                         </div>)
                     }
