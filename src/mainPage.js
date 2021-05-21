@@ -4,9 +4,9 @@ export default class MainPage extends Component{
   constructor(){
     super();
     this.state={
-      width:10,
-      height:10,
-      mines:10
+      width:30,
+      height:16,
+      mines:99
     }
   }
   handleInputChange=(e)=>{
@@ -16,6 +16,31 @@ export default class MainPage extends Component{
       [target.name]: value
     });
   }
+  setLevel=(level)=>{
+    switch(level){
+      case 'beginner':
+        this.setState({
+          width:10,
+          height:10,
+          mines:10
+        });
+      break;
+      case 'medium':
+        this.setState({
+          width:16,
+          height:16,
+          mines:40
+        });
+      break;
+      case 'expert':
+        this.setState({
+          width:30,
+          height:16,
+          mines:99
+        });
+      break;
+    }
+  }
   startGame=()=>{
     window.location.href=window.location.pathname+`#/game/${this.state.width},${this.state.height},${this.state.mines}`;
   }
@@ -23,9 +48,9 @@ export default class MainPage extends Component{
     return (
       <div className="App">
         <h1>Minesweeper</h1>
-        <button>初级</button>
-        <button>中级</button>
-        <button>高级</button>
+        <button onClick={e=>this.setLevel('beginner')}>初级</button>
+        <button onClick={e=>this.setLevel('medium')}>中级</button>
+        <button onClick={e=>this.setLevel('expert')}>高级</button>
         宽度<input name='width' value={this.state.width} onInput={this.handleInputChange}/>
         高度<input name='height' value={this.state.height} onInput={this.handleInputChange}/>
         雷数<input name='mines' value={this.state.mines} onInput={this.handleInputChange}/>
