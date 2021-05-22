@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './style.less';
+import './style.scss';
 import MainPage from './mainPage';
 import GamePage from './game';
 import { HashRouter, Route, Redirect } from 'react-router-dom';
