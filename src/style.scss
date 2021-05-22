@@ -1,3 +1,15 @@
+::-webkit-scrollbar{
+  width:4px;
+  height:4px;
+}
+::-webkit-scrollbar-thumb{
+  border-radius:2px;
+  background:#DCDFE6;
+}
+::-webkit-scrollbar-track{
+  background:rgba(0,0,0,0);
+  border:none;
+}
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,29 +17,106 @@ body {
         sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: contain;
+    user-select: none;
 }
 code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',monospace;
 }
 .gamePage{
-    .gamePadRow{
-        line-height:1;
-        white-space:nowrap;
-        .cell{
-            user-select:none;
-            display:inline-block;
-            vertical-align:top;
-            width:32px;
-            height:32px;
-            line-height:32px;
-            text-align:center;
-            border:1px solid #cccccc;
-            background:#aaaaaa;
-            border-radius:1px;
-            cursor:pointer;
-            &.digged{
-                background:#ffffff;
-            }
+  position: fixed;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  display:flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+  text-align: center;
+  .titleBar{
+    flex:none;
+    padding:10px;
+    font-size:14px;
+    text-align: left;
+    span{
+      display: inline-block;
+      vertical-align: top;
+      &.back,
+      &.newGame{
+        color:#409eff;
+        cursor:pointer;
+        margin-right:30px;
+        &:hover{
+          color:#66b1ff;
+          text-decoration: underline;
         }
+      }
+      &.steps{
+        width:70px;
+        text-align:left;
+      }
+      &.remainMines{
+        width:100px;
+        text-align:left;
+      }
+      &.statusLine{
+        width:45px;
+        &.success{
+          color:#67C23A;
+        }
+        &.failed{
+          color:#F56C6C;
+        }
+      }
     }
+  }
+  .gamePadOuter{
+    flex:auto;
+    overflow: auto;
+    text-align: center;
+    width:100%;
+  }
+  .gamePad{
+    display:inline-block;
+    vertical-align: top;
+    .gamePadRow{
+      line-height:1;
+      white-space:nowrap;
+      .cell{
+        box-sizing: border-box;
+        user-select:none;
+        display:inline-block;
+        vertical-align:top;
+        width:32px;
+        height:32px;
+        line-height:32px;
+        font-size:16px;
+        text-align:center;
+        margin:1px;
+        background:#DCDFE6;
+        color:#303133;
+        border-radius:2px;
+        cursor:pointer;
+        &.inactive{
+          cursor: default;
+        }
+        &.mine{
+          color:#F56C6C;
+        }
+        &.marked{
+          color:#E6A23C;
+          font-size:22px;
+          line-height:30px;
+        }
+        &.digged{
+          background:#F2F6FC;
+          &.mine{
+            color:#DCDFE6;
+            background:#F56C6C;
+          }
+        }
+      }
+    }
+  }
 }

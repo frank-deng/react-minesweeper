@@ -1,4 +1,4 @@
-import {Component, useMemo} from 'react';
+import {Component} from 'react';
 import Cell from './cell';
 
 const VALUE_MINE=9;
@@ -10,6 +10,7 @@ export default class GamePage extends Component{
           height:null,
           mines:null,
           board:[],
+          operation:[],
           status:'initial'
         };
     }
@@ -35,6 +36,7 @@ export default class GamePage extends Component{
         }
         this.setState({
             board,
+            operation:[],
             status:'initial'
         });
     }
@@ -256,6 +258,14 @@ export default class GamePage extends Component{
 
             return{
                 ...state,
+                operation:[ //记录操作
+                  ...state.operation,
+                  {
+                    time:new Date().getTime(),
+                    col:data.col,
+                    row:data.row
+                  }
+                ],
                 status,
                 board
             }
@@ -274,21 +284,39 @@ export default class GamePage extends Component{
     }
     render(){
         let status=this.state.status;
+        let remainMines=this.state.mines;
+        for(let row of this.state.board){
+          for(let cell of row.data){
+            if(0x40&cell.value){
+              remainMines--;
+            }
+          }
+        }
         return (
             <div className="gamePage">
-                <button onClick={this.goBack}>返回</button>
-                <button onClick={this.startGame}>重来</button>
-                {
-                    'success'==status ? <span>成功了</span> : 'failed'==status ? <span>失败了</span> : null
-                }
-                <div className='gamePad'>
-                    {
-                        this.state.board.map(row=><div className='gamePadRow' key={row.key}>
-                            {
-                                row.data.map(cell=><Cell data={cell} key={cell.key} onDig={this.handleDig} status={this.state.status}></Cell>)
-                            }
-                        </div>)
-                    }
+                <div className="titleBar">
+                  <span className='back' onClick={this.goBack}>返回</span>
+                  <span className='newGame' onClick={this.startGame}>新游戏</span>
+                  <span className='steps'>步数：{this.state.operation.length}</span>
+                  <span className='remainMines'>剩余雷数：{remainMines}</span>
+                  {
+                      'success'==status
+                      ? <span className='statusLine success'>成功了</span>
+                      : 'failed'==status
+                      ? <span className='statusLine failed'>失败了</span>
+                      : <span className='statusLine'></span>
+                  }
+                </div>
+                <div className='gamePadOuter'>
+                  <div className='gamePad'>
+                      {
+                          this.state.board.map(row=><div className='gamePadRow' key={row.key}>
+                              {
+                                  row.data.map(cell=><Cell data={cell} key={cell.key} onDig={this.handleDig} status={this.state.status}></Cell>)
+                              }
+                          </div>)
+                      }
+                  </div>
                 </div>
             </div>
         );

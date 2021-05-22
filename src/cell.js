@@ -11,9 +11,16 @@ export default class GamePage extends Component{
     render(){
         let data=this.props.data, value=data.value&0x0f;
         let digged=data.value&0x80, marked=data.value&0x40;
+        let classList=[
+            'cell',
+            digged ? 'digged' : '',
+            VALUE_MINE==value ? 'mine' : '',
+            marked ? 'marked' : '',
+            'failed'==this.props.status || 'success'==this.props.status ? 'inactive' : ''
+        ];
         let valueDisplay='';
         if(marked){
-            valueDisplay='旗';
+            valueDisplay='★';
         }else if(digged){
             switch(value){
                 case VALUE_MINE:
@@ -30,7 +37,7 @@ export default class GamePage extends Component{
             valueDisplay='雷';
         }
         return (
-            <div className={['cell', digged ? 'digged' : ''].join(' ')} onClick={this.handleClick}>
+            <div className={classList.join(' ')} onClick={this.handleClick}>
                 {valueDisplay}
             </div>
         );
