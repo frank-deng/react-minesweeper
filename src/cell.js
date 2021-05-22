@@ -32,26 +32,6 @@ export default class GamePage extends Component{
         return (
             <div className={['cell', digged ? 'digged' : ''].join(' ')} onClick={this.handleClick}>
                 {valueDisplay}
-                <style>
-                    {`
-                        .cell{
-                            user-select:none;
-                            display:inline-block;
-                            vertical-align:top;
-                            width:32px;
-                            height:32px;
-                            line-height:32px;
-                            text-align:center;
-                            border:1px solid #cccccc;
-                            background:#aaaaaa;
-                            border-radius:1px;
-                            cursor:pointer;
-                        }
-                        .cell.digged{
-                            background:#ffffff;
-                        }
-                    `}
-                </style>
             </div>
         );
     }

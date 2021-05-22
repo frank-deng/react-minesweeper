@@ -1,0 +1,33 @@
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',monospace;
+}
+.gamePage{
+    .gamePadRow{
+        line-height:1;
+        white-space:nowrap;
+        .cell{
+            user-select:none;
+            display:inline-block;
+            vertical-align:top;
+            width:32px;
+            height:32px;
+            line-height:32px;
+            text-align:center;
+            border:1px solid #cccccc;
+            background:#aaaaaa;
+            border-radius:1px;
+            cursor:pointer;
+            &.digged{
+                background:#ffffff;
+            }
+        }
+    }
+}

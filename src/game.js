@@ -275,7 +275,7 @@ export default class GamePage extends Component{
     render(){
         let status=this.state.status;
         return (
-            <div className="GamePage">
+            <div className="gamePage">
                 <button onClick={this.goBack}>返回</button>
                 <button onClick={this.startGame}>重来</button>
                 {
@@ -290,14 +290,6 @@ export default class GamePage extends Component{
                         </div>)
                     }
                 </div>
-                <style>
-                    {`
-                        .gamePadRow{
-                            line-height:1;
-                            white-space:nowrap;
-                        }
-                    `}
-                </style>
             </div>
         );
     }
