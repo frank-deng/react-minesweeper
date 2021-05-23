@@ -1,4 +1,5 @@
 import {VALUE_MINE} from './game.js';
+
 export function writeLog(board,operation,success=false){
     let width=board[0].data.length, height=board.length, mines=[];
     for(let row=0; row<height; row++){
@@ -9,13 +10,12 @@ export function writeLog(board,operation,success=false){
             }
         }
     }
-    console.log('成功或失败时记录当前局面')
-    
+
     let storageData=[];
     try{
-        storageData=localStorage.getItem('react-minesweeper-log');
-        if(storageData){
-            storageData=JSON.parse(storageData);
+        let storageDataRaw=localStorage.getItem('react-minesweeper-log');
+        if(storageDataRaw){
+            storageData=JSON.parse(storageDataRaw);
         }
     }catch(e){
         console.error(e);

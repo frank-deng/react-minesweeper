@@ -12,8 +12,7 @@ export default class GamePage extends Component{
           mines:null,
           board:[],
           operation:[],
-          status:'initial',
-          logged:false
+          status:'initial'
         };
     }
     goBack=()=>{
@@ -39,8 +38,7 @@ export default class GamePage extends Component{
         this.setState({
             board,
             operation:[],
-            status:'initial',
-            logged:false
+            status:'initial'
         });
     }
     getNeighbours(rows,cols,row0,col0){
@@ -227,72 +225,68 @@ export default class GamePage extends Component{
       return true;
     }
     handleDig=(data)=>{
-        this.setState(state=>{
-            let logged=state.logged;
-            let board=state.board.map(row=>({
-                ...row,
-                data:row.data.map(cell=>({
-                    ...cell
-                }))
-            })), status=state.status;
-            //游戏结束了
-            if('failed'===status || 'success'===status){
-                return;
+      let state=this.state;
+      let board=state.board.map(row=>({
+          ...row,
+          data:row.data.map(cell=>({
+              ...cell
+          }))
+      })), status=state.status;
+      //游戏结束了
+      if('failed'===status || 'success'===status){
+          return;
+      }
+
+      //刚开始挖时布雷
+      if('initial'===status){
+          this.initMines(board,state.mines,data.row,data.col);
+          status='running';
+      }
+
+      //挖开方块
+      let ret = this.dig(board,data.row,data.col);
+      if(-1===ret){
+          status='failed';
+      }
+
+      //处理更多雷
+      while('running'===status && this.autoproc(board)){}
+
+      //当前局面是否完成
+      if('running'===status && this.gameFinished(board)){
+        //完成时把没标上的地雷标上
+        for(let row of board){
+          row.data.forEach((cell,col)=>{
+            let counter=cell.value&0x0f;
+            if(VALUE_MINE===counter){
+              row.data[col].value|=0x40;
             }
+          });
+        }
+        status='success';
+      }
 
-            //刚开始挖时布雷
-            if('initial'===status){
-                this.initMines(board,state.mines,data.row,data.col);
-                status='running';
-            }
-
-            //挖开方块
-            let ret = this.dig(board,data.row,data.col);
-            if(-1===ret){
-                status='failed';
-            }
-
-            //处理更多雷
-            while('running'===status && this.autoproc(board)){}
-
-            //当前局面是否完成
-            if('running'===status && this.gameFinished(board)){
-              //完成时把没标上的地雷标上
-              for(let row of board){
-                row.data.forEach((cell,col)=>{
-                  let counter=cell.value&0x0f;
-                  if(VALUE_MINE===counter){
-                    row.data[col].value|=0x40;
-                  }
-                });
-              }
-              status='success';
-            }
-
-            //新加一步
-            let operation=[ //记录操作
-              ...state.operation,
-              {
-                time:new Date().getTime(),
-                col:data.col,
-                row:data.row
-              }
-            ];
-
-            //成功或失败时记录当前局面
-            if(!logged && ('failed'===status || 'success'===status)){
-              writeLog(board,operation,'success'===status);
-              logged=true;
-            }
-
-            return{
-                ...state,
-                operation,
-                status,
-                board,
-                logged
-            }
-        });
+      //新加一步
+      let operation=[ //记录操作
+        ...state.operation,
+        {
+          time:new Date().getTime(),
+          col:data.col,
+          row:data.row
+        }
+      ];
+  
+      //成功或失败时记录当前局面
+      if('failed'===status || 'success'===status){
+        writeLog(board,operation,'success'===status);
+      }
+      
+      this.setState({
+        ...state,
+        operation,
+        status,
+        board
+      });
     }
     componentWillMount(){
         let [width,height,mines]=this.props.match.params.param.split(',');
