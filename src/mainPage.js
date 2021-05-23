@@ -104,27 +104,27 @@ export default class MainPage extends Component{
     return (
       <div className="mainPage">
         <h1>极速扫雷</h1>
-        <div class='levelSelection'>
-          <span class='selectLevel' onClick={e=>this.setLevel('beginner')}>初级</span>
-          <span class='selectLevel' onClick={e=>this.setLevel('medium')}>中级</span>
-          <span class='selectLevel' onClick={e=>this.setLevel('expert')}>高级</span>
+        <div className='levelSelection'>
+          <span className='selectLevel' onClick={e=>this.setLevel('beginner')}>初级</span>
+          <span className='selectLevel' onClick={e=>this.setLevel('medium')}>中级</span>
+          <span className='selectLevel' onClick={e=>this.setLevel('expert')}>高级</span>
         </div>
-        <div class='gameSettingForm'>
-          <div class='formItem'>
-            <span class='itemTitle'>宽度({MIN_WIDTH}-{MAX_WIDTH})</span>
-            <input name='width' maxlength='2' value={this.state.width} onInput={this.handleInputChange}/>
+        <div className='gameSettingForm'>
+          <div className='formItem'>
+            <span className='itemTitle'>宽度({MIN_WIDTH}-{MAX_WIDTH})</span>
+            <input name='width' autoComplete="off" maxLength='2' value={this.state.width} onInput={this.handleInputChange}/>
           </div>
-          <div class='formItem'>
-            <span class='itemTitle'>高度({MIN_HEIGHT}-{MAX_HEIGHT})</span>
-            <input name='height' maxlength='2' value={this.state.height} onInput={this.handleInputChange}/>
+          <div className='formItem'>
+            <span className='itemTitle'>高度({MIN_HEIGHT}-{MAX_HEIGHT})</span>
+            <input name='height' autoComplete="off" maxLength='2' value={this.state.height} onInput={this.handleInputChange}/>
           </div>
-          <div class='formItem'>
-            <span class='itemTitle'>雷数(2-{MAX_WIDTH*MAX_HEIGHT-1})</span>
-            <input name='mines' maxlength='3' value={this.state.mines} onInput={this.handleInputChange}/>
+          <div className='formItem'>
+            <span className='itemTitle'>雷数(2-{MAX_WIDTH*MAX_HEIGHT-1})</span>
+            <input name='mines' autoComplete="off" maxLength='3' value={this.state.mines} onInput={this.handleInputChange}/>
           </div>
         </div>
         {errorMsg && <div className='errorMsg'>{errorMsg}</div>}
-        <button class='startGame' onClick={this.startGame}><span>开始游戏</span></button>
+        <button className='startGame' onClick={this.startGame}><span>开始游戏</span></button>
       </div>
     );
   }

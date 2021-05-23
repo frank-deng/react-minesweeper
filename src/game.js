@@ -1,7 +1,8 @@
 import {Component} from 'react';
 import Cell from './cell';
+import {writeLog} from './logManager';
 
-const VALUE_MINE=9;
+export const VALUE_MINE=9;
 export default class GamePage extends Component{
     constructor(){
         super();
@@ -11,7 +12,8 @@ export default class GamePage extends Component{
           mines:null,
           board:[],
           operation:[],
-          status:'initial'
+          status:'initial',
+          logged:false
         };
     }
     goBack=()=>{
@@ -37,14 +39,15 @@ export default class GamePage extends Component{
         this.setState({
             board,
             operation:[],
-            status:'initial'
+            status:'initial',
+            logged:false
         });
     }
     getNeighbours(rows,cols,row0,col0){
       let result=[];
       for(let row=row0-1; row<=row0+1; row++){
         for(let col=col0-1; col<=col0+1; col++){
-          if(row<0 || row>=rows || col<0 || col>=cols || (row==row0 && col==col0)){
+          if(row<0 || row>=rows || col<0 || col>=cols || (row===row0 && col===col0)){
             continue;
           }
           result.push({
@@ -58,7 +61,7 @@ export default class GamePage extends Component{
         let rows=target.length, cols=target[0].data.length, count=0,row,col;
         for({row,col} of this.getNeighbours(rows,cols,row0,col0)){
             let cell=target[row].data[col];
-            if(VALUE_MINE==(cell.value&0xf)){
+            if(VALUE_MINE===(cell.value&0xf)){
                 count++;
             }
         }
@@ -114,7 +117,7 @@ export default class GamePage extends Component{
         for(let row=0; row<rows; row++){
           for(let col=0; col<cols; col++){
             let cell=target[row].data[col];
-            if(VALUE_MINE==cell.value){
+            if(VALUE_MINE===cell.value){
                 continue;
             }
             cell.value=this.getNeighbourMineCount(target,row,col);
@@ -133,7 +136,7 @@ export default class GamePage extends Component{
         target[row0].data[col0].value |= 0x80;
   
         //挖到雷
-        if(VALUE_MINE==counter){
+        if(VALUE_MINE===counter){
           return -1;
         }
 
@@ -150,20 +153,20 @@ export default class GamePage extends Component{
       for(let row=0; row<rows; row++){
         for(let col=0; col<cols; col++){
           let cell=target[row].data[col], counter=cell.value&0x0f;
-          if(VALUE_MINE==counter || !(0xC0 & cell.value)){
+          if(VALUE_MINE===counter || !(0xC0 & cell.value)){
             continue;
           }
           let neighbours=this.getNeighbours(rows,cols,row,col).filter(({row,col})=>{
               let cell=target[row].data[col];
               return !(0x80&cell.value);
           });
-          if(0==counter){
+          if(0===counter){
             neighbours.forEach(({row,col})=>{
                 if(this.dig(target,row,col)){
                     further=true;
                 }
             });
-          }else if(neighbours.length == counter){
+          }else if(neighbours.length === counter){
             neighbours.forEach(({row,col})=>{
                 this.mark(target,row,col);
             });
@@ -175,7 +178,7 @@ export default class GamePage extends Component{
       for(let row=0; row<rows; row++){
         for(let col=0; col<cols; col++){
           let cell=target[row].data[col], counter=cell.value&0x0f;
-          if(VALUE_MINE==counter || !(0xC0 & cell.value) || 0==counter){
+          if(VALUE_MINE===counter || !(0xC0 & cell.value) || 0===counter){
             continue;
           }
 
@@ -189,7 +192,7 @@ export default class GamePage extends Component{
           });
 
           //当前块周围被标记的块的个数不等于当前块的雷数
-          if(counter!=markCount){
+          if(counter!==markCount){
             continue;
           }
 
@@ -203,7 +206,7 @@ export default class GamePage extends Component{
           });
 
           //挖到雷了
-          if('failed'==this.status){
+          if('failed'===this.status){
             return false;
           }
         }
@@ -216,17 +219,8 @@ export default class GamePage extends Component{
       for(let row=0; row<rows; row++){
         for(let col=0; col<cols; col++){
           let cell=target[row].data[col], counter=cell.value&0x0f;
-          if(VALUE_MINE!=counter && !(0x80&cell.value)){
+          if(VALUE_MINE!==counter && !(0x80&cell.value)){
               return false;
-          }
-        }
-      }
-      //完成时把没标上的地雷标上
-      for(let row=0; row<rows; row++){
-        for(let col=0; col<cols; col++){
-          let cell=target[row].data[col], counter=cell.value&0x0f;
-          if(VALUE_MINE==counter){
-            target[row].data[col].value|=0x40;
           }
         }
       }
@@ -234,6 +228,7 @@ export default class GamePage extends Component{
     }
     handleDig=(data)=>{
         this.setState(state=>{
+            let logged=state.logged;
             let board=state.board.map(row=>({
                 ...row,
                 data:row.data.map(cell=>({
@@ -241,42 +236,61 @@ export default class GamePage extends Component{
                 }))
             })), status=state.status;
             //游戏结束了
-            if('failed'==status || 'success'==status){
+            if('failed'===status || 'success'===status){
                 return;
             }
 
             //刚开始挖时布雷
-            if('initial'==status){
+            if('initial'===status){
                 this.initMines(board,state.mines,data.row,data.col);
                 status='running';
             }
 
             //挖开方块
             let ret = this.dig(board,data.row,data.col);
-            if(-1==ret){
+            if(-1===ret){
                 status='failed';
             }
 
             //处理更多雷
-            while('running'==status && this.autoproc(board)){}
+            while('running'===status && this.autoproc(board)){}
 
             //当前局面是否完成
-            if('running'==status && this.gameFinished(board)){
-                status='success';
+            if('running'===status && this.gameFinished(board)){
+              //完成时把没标上的地雷标上
+              for(let row of board){
+                row.data.forEach((cell,col)=>{
+                  let counter=cell.value&0x0f;
+                  if(VALUE_MINE===counter){
+                    row.data[col].value|=0x40;
+                  }
+                });
+              }
+              status='success';
+            }
+
+            //新加一步
+            let operation=[ //记录操作
+              ...state.operation,
+              {
+                time:new Date().getTime(),
+                col:data.col,
+                row:data.row
+              }
+            ];
+
+            //成功或失败时记录当前局面
+            if(!logged && ('failed'===status || 'success'===status)){
+              writeLog(board,operation,'success'===status);
+              logged=true;
             }
 
             return{
                 ...state,
-                operation:[ //记录操作
-                  ...state.operation,
-                  {
-                    time:new Date().getTime(),
-                    col:data.col,
-                    row:data.row
-                  }
-                ],
+                operation,
                 status,
-                board
+                board,
+                logged
             }
         });
     }
@@ -309,9 +323,9 @@ export default class GamePage extends Component{
                   <span className='steps'>步数：{this.state.operation.length}</span>
                   <span className='remainMines'>剩余雷数：{remainMines}</span>
                   {
-                      'success'==status
+                      'success'===status
                       ? <span className='statusLine success'>成功了</span>
-                      : 'failed'==status
+                      : 'failed'===status
                       ? <span className='statusLine failed'>失败了</span>
                       : <span className='statusLine'></span>
                   }

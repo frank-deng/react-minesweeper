@@ -2,9 +2,6 @@ import {Component} from 'react';
 
 const VALUE_MINE=9;
 export default class GamePage extends Component{
-    constructor(){
-        super();
-    }
     handleClick=()=>{
         this.props.onDig(this.props.data);
     }
@@ -14,9 +11,9 @@ export default class GamePage extends Component{
         let classList=[
             'cell',
             digged ? 'digged' : '',
-            VALUE_MINE==value ? 'mine' : '',
+            VALUE_MINE===value ? 'mine' : '',
             marked ? 'marked' : '',
-            'failed'==this.props.status || 'success'==this.props.status ? 'inactive' : ''
+            'failed'===this.props.status || 'success'===this.props.status ? 'inactive' : ''
         ];
         let valueDisplay='';
         if(marked){
@@ -33,7 +30,7 @@ export default class GamePage extends Component{
                     valueDisplay=value;
                 break;
             }
-        }else if('failed'==this.props.status && VALUE_MINE==value){
+        }else if('failed'===this.props.status && VALUE_MINE===value){
             valueDisplay='雷';
         }
         return (
