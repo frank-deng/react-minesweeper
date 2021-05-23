@@ -23,6 +23,75 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',monospace;
 }
+.mainPage{
+  text-align: center;
+  font-size:14px;
+  h1{
+    font-size:32px;
+    color:#409EFF;
+    font-weight: normal;
+  }
+  .levelSelection{
+    margin-bottom:10px;
+    .selectLevel{
+      color:#409eff;
+      cursor:pointer;
+      &+.selectLevel{
+        margin-left:20px;
+      }
+      &:hover{
+        color:#66b1ff;
+        text-decoration: underline;
+      }
+    }
+  }
+  .gameSettingForm{
+    margin:0 auto 10px auto;
+    width:110px;
+    .formItem{
+      position:relative;
+      padding-left:80px;
+      .itemTitle{
+        display:block;
+        position: absolute;
+        left:0;
+        top:0;
+        line-height:26px;
+      }
+      input{
+        display: block;
+        padding:0;
+        width:100%;
+        line-height:28px;
+        background: none;
+        border:none;
+        border-bottom:1px solid #409eff;
+        outline: none;
+        &:focus{
+          border-bottom-color:#66b1ff;
+        }
+      }
+    }
+  }
+  .errorMsg{
+    color:#F56C6C;
+    white-space: pre-line;
+    margin-bottom:10px;
+  }
+  .startGame{
+    border-radius:15px;
+    height:30px;
+    line-height:30px;
+    padding:0 20px;
+    color:#ffffff;
+    background:#409eff;
+    border:none;
+    cursor: pointer;
+    &:hover{
+      background:#66b1ff;
+    }
+  }
+}
 .gamePage{
   position: fixed;
   left:0;

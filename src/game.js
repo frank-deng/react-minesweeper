@@ -212,16 +212,25 @@ export default class GamePage extends Component{
       return further;
     }
     gameFinished(target){
-        let rows=target.length, cols=target[0].data.length;
-        for(let row=0; row<rows; row++){
-          for(let col=0; col<cols; col++){
-            let cell=target[row].data[col], counter=cell.value&0x0f;
-            if(VALUE_MINE!=counter && !(0x80&cell.value)){
-                return false;
-            }
+      let rows=target.length, cols=target[0].data.length;
+      for(let row=0; row<rows; row++){
+        for(let col=0; col<cols; col++){
+          let cell=target[row].data[col], counter=cell.value&0x0f;
+          if(VALUE_MINE!=counter && !(0x80&cell.value)){
+              return false;
           }
         }
-        return true;
+      }
+      //完成时把没标上的地雷标上
+      for(let row=0; row<rows; row++){
+        for(let col=0; col<cols; col++){
+          let cell=target[row].data[col], counter=cell.value&0x0f;
+          if(VALUE_MINE==counter){
+            target[row].data[col].value|=0x40;
+          }
+        }
+      }
+      return true;
     }
     handleDig=(data)=>{
         this.setState(state=>{
