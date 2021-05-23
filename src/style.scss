@@ -53,11 +53,11 @@ code {
         }
       }
       &.steps{
-        width:70px;
+        min-width:80px;
         text-align:left;
       }
       &.remainMines{
-        width:100px;
+        min-width:100px;
         text-align:left;
       }
       &.statusLine{
