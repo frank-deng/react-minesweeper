@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './style.scss';
-import MainPage from './mainPage';
 import GamePage from './game';
 import { HashRouter, Route, Redirect } from 'react-router-dom';
 //import reportWebVitals from './reportWebVitals';
@@ -9,8 +8,7 @@ import { HashRouter, Route, Redirect } from 'react-router-dom';
 ReactDOM.render(
   <React.StrictMode>
     <HashRouter>
-      <Route path="/" exact component={MainPage}></Route>
-      <Route path="/game/:param" exact component={GamePage}></Route>
+      <Route path="/" exact component={GamePage}></Route>
       <Redirect to="/" from='*'/>
     </HashRouter>
   </React.StrictMode>,

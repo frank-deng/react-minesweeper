@@ -32,3 +32,15 @@ export function writeLog(board,operation,success=false){
     });
     localStorage.setItem('react-minesweeper-log',JSON.stringify(storageData));
 }
+export function readLog(){
+    let storageData=[];
+    try{
+        let storageDataRaw=localStorage.getItem('react-minesweeper-log');
+        if(storageDataRaw){
+            storageData=JSON.parse(storageDataRaw);
+        }
+    }catch(e){
+        console.error(e);
+    }
+    return storageData;
+}

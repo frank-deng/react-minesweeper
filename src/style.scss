@@ -23,14 +23,22 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',monospace;
 }
-.mainPage{
+.dialog-container{
+  position: fixed;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  background-color: rgba(0,0,0,0.3);
+}
+.settingDialog{
+  background-color: #ffffff;
+  border-radius:4px;
+  width:400px;
+  margin:50px auto 0 auto;
+  padding:10px;
   text-align: center;
   font-size:14px;
-  h1{
-    font-size:32px;
-    color:#409EFF;
-    font-weight: normal;
-  }
   .levelSelection{
     margin-bottom:10px;
     .selectLevel{
@@ -85,10 +93,26 @@ code {
     padding:0 20px;
     color:#ffffff;
     background:#409eff;
-    border:none;
+    border:1px solid #409eff;
     cursor: pointer;
     &:hover{
+      border-color:#66b1ff;
       background:#66b1ff;
+    }
+  }
+  .cancelSetting{
+    margin-left:20px;
+    border-radius:15px;
+    height:30px;
+    line-height:30px;
+    padding:0 20px;
+    color:#409eff;
+    background:#ffffff;
+    border:1px solid #409eff;
+    cursor: pointer;
+    &:hover{
+      border-color:#66b1ff;
+      color:#66b1ff;
     }
   }
 }
