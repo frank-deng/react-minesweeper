@@ -17,15 +17,27 @@ function limitValue(value,min,max){
 export default class SettingDialog extends Component{
   state={
     display:false,
-    resolve:null,
-    reject:null,
     width:30,
     height:16,
     mines:99,
     errorMsg:null
   }
+  resolve=null;
+  reject=null;
   constructor(){
     super();
+  }
+  open(param){
+    return new Promise((resolve,reject)=>{
+      Object.assign(this,{
+        resolve,
+        reject
+      });
+      this.setState({
+        ...param,
+        display:true
+      });
+    })
   }
   handleInputChange=(e)=>{
     const target = e.target;
@@ -102,24 +114,31 @@ export default class SettingDialog extends Component{
       mines=maxMines;
     }
     
-    if(this.props.onClose){
-      this.props.onClose({
+    if(this.resolve){
+      this.resolve({
         width:this.state.width,
         height:this.state.height,
         mines:this.state.mines
       });
     }
+    this.resolve=this.reject=null;
+    this.setState({
+      display:false
+    });
   }
   cancelSubmit=()=>{
-    if(!this.props.onClose){
-      return;
+    if(this.reject){
+      this.reject('cancel');
     }
-    this.props.onClose(null);
+    this.resolve=this.reject=null;
+    this.setState({
+      display:false
+    });
   }
   render(){
     let errorMsg=this.state.errorMsg;
     return (
-      <Dialog visible={this.props.visible} customClass='settingDialog'>
+      <Dialog visible={this.state.display} customClass='settingDialog'>
         <div className='levelSelection'>
           <span className='selectLevel' onClick={e=>this.setLevel('beginner')}>初级</span>
           <span className='selectLevel' onClick={e=>this.setLevel('medium')}>中级</span>

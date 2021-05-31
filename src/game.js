@@ -11,8 +11,7 @@ export default class GamePage extends Component{
     mines:null,
     board:[],
     operation:[],
-    status:'initial',
-    displaySettingDialog:false
+    status:'initial'
   };
   $refs={
     settingDialog:createRef()
@@ -20,21 +19,21 @@ export default class GamePage extends Component{
   constructor(){
       super();
   }
-  openSetting=()=>{
-    this.setState({
-      displaySettingDialog:true
-    });
-  }
-  closeSetting=async (data)=>{
-    await this.setState({
-      displaySettingDialog:false
-    });
-    if(!data){
-      return;
+  openSetting=async()=>{
+    try{
+      let data = await this.$refs.settingDialog.current.open({
+        width:this.state.width,
+        height:this.state.height,
+        mines:this.state.mines
+      });
+      await this.setState(data);
+      this.startGame();
+      localStorage.setItem('react-minesweeper-settings',JSON.stringify(data));
+    }catch(e){
+      if('cancel'!==e){
+        console.error(e);
+      }
     }
-    await this.setState(data);
-    this.startGame();
-    localStorage.setItem('react-minesweeper-settings',JSON.stringify(data));
   }
   startGame=()=>{
     let board=[], width=this.state.width, height=this.state.height;
@@ -364,12 +363,7 @@ export default class GamePage extends Component{
             }
           </div>
         </div>
-        <SettingDialog
-          width={this.state.width}
-          height={this.state.height}
-          mines={this.state.mines}
-          visible={this.state.displaySettingDialog}
-          onClose={this.closeSetting}>awdfaw</SettingDialog>
+        <SettingDialog ref={this.$refs.settingDialog}>awdfaw</SettingDialog>
       </div>
     );
   }

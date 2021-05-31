@@ -1,3 +1,4 @@
+import {v4 as uuid} from 'uuid';
 import {VALUE_MINE} from './game.js';
 
 export function writeLog(board,operation,success=false){
@@ -23,7 +24,13 @@ export function writeLog(board,operation,success=false){
     if(!Array.isArray(storageData)){
         storageData=[];
     }
+    for(let item of storageData){
+        if(!item.id){
+            item.id=uuid();
+        }
+    }
     storageData.push({
+        id:uuid(),
         width,
         height,
         success,
