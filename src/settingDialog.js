@@ -116,13 +116,16 @@ export default class SettingDialog extends Component{
     
     if(this.resolve){
       this.resolve({
-        width:this.state.width,
-        height:this.state.height,
-        mines:this.state.mines
+        width,
+        height,
+        mines
       });
     }
     this.resolve=this.reject=null;
     this.setState({
+      width,
+      height,
+      mines,
       display:false
     });
   }
