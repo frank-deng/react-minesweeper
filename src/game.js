@@ -327,6 +327,9 @@ export default class GamePage extends Component{
     }
     this.startGame();
   }
+  openDataAnalysis=()=>{
+    window.location=window.location.pathname+'#/dataAnalysis';
+  }
   render(){
     let status=this.state.status;
     let remainMines=this.state.mines;
@@ -340,8 +343,9 @@ export default class GamePage extends Component{
     return (
       <div className="gamePage">
         <div className="titleBar">
-          <span className='back' onClick={this.openSetting}>设置</span>
-          <span className='newGame' onClick={this.startGame}>新游戏</span>
+          <span className='newGame btn-link' onClick={this.startGame}>新游戏</span>
+          <span className='back btn-link' onClick={this.openSetting}>设置</span>
+          <span className='newGame btn-link' onClick={this.openDataAnalysis}>数据分析</span>
           <span className='steps'>步数：{this.state.operation.length}</span>
           <span className='remainMines'>剩余雷数：{remainMines}</span>
           {

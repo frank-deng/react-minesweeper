@@ -135,11 +135,10 @@ code {
     span{
       display: inline-block;
       vertical-align: top;
-      &.back,
-      &.newGame{
+      &.btn-link{
         color:#409eff;
         cursor:pointer;
-        margin-right:30px;
+        margin-right:20px;
         &:hover{
           color:#66b1ff;
           text-decoration: underline;
@@ -173,6 +172,7 @@ code {
   .gamePad{
     display:inline-block;
     vertical-align: top;
+    padding:0 10px 30px 10px;
     .gamePadRow{
       line-height:1;
       white-space:nowrap;
