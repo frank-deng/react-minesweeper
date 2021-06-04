@@ -2,6 +2,7 @@ import {Component} from 'react';
 import {readLog} from './logManager';
 import {saveAs} from 'file-saver';
 import './dataAnalysis.scss';
+import dbf from 'dbf';
 export default class DataAnalysis extends Component{
     state={
         dataRaw:null,
@@ -9,11 +10,11 @@ export default class DataAnalysis extends Component{
     };
     componentWillMount(){
         let dataRaw = readLog();
-        let listLow = dataRaw.filter(item=>(10==item.width && 10==item.height && 10==item.mines.length));
-        let listMid = dataRaw.filter(item=>(16==item.width && 16==item.height && 40==item.mines.length));
+        let listLow = dataRaw.filter(item=>(10===item.width && 10===item.height && 10===item.mines.length));
+        let listMid = dataRaw.filter(item=>(16===item.width && 16===item.height && 40===item.mines.length));
         let listHigh = dataRaw.filter(item=>(
-            ((30==item.width && 16==item.height) || (16==item.width && 30==item.height))
-            && 99==item.mines.length));
+            ((30===item.width && 16===item.height) || (16===item.width && 30===item.height))
+            && 99===item.mines.length));
         this.setState({
             dataRaw,
             dataList:[
@@ -38,7 +39,7 @@ export default class DataAnalysis extends Component{
             if(item.success){
                 success_times++;
             }
-            if(1==item.operation.length){
+            if(1===item.operation.length){
                 one_click_finish++;
             }
             total_steps+=item.operation.length;
@@ -55,6 +56,21 @@ export default class DataAnalysis extends Component{
     exportJSON=()=>{
         saveAs(new Blob([JSON.stringify(this.state.dataRaw)], {type: "text/plain;charset=utf-8"}),'minesweeper-log.json');
     }
+    exportDBF=()=>{
+        let dbfData=[];
+        for(let item of this.state.dataRaw){
+            dbfData.push({
+                ID:item.id,
+                WIDTH:item.width,
+                HEIGHT:item.height,
+                MINES:item.mines.length,
+                SUCCESS:item.success ? 'Y' : 'N',
+                START_TIME:'\''+item.operation[0].time,
+                ELAPSED_TIME:((item.operation[item.operation.length-1].time-item.operation[0].time)/1000).toFixed(2)
+            });
+        }
+        saveAs(new Blob([dbf.structure(dbfData).buffer]),'mine.dbf');
+    }
     goBack=()=>{
         window.location=window.location.pathname+'#/';
     }
@@ -63,26 +79,29 @@ export default class DataAnalysis extends Component{
             <div className='toolbox'>
                 <span className='btn-link' onClick={this.goBack}>返回</span>
                 <span className='btn-link' onClick={this.exportJSON}>导出JSON数据</span>
+                <span className='btn-link' onClick={this.exportDBF}>导出DBF数据</span>
             </div>
             <table className='mainTable'>
-                <tr>
-                    <th>级别</th>
-                    <th>成功率</th>
-                    <th>平均步数</th>
-                    <th>平均用时</th>
-                    <th>一次成功次数</th>
-                </tr>
-                {
-                    this.state.dataList.map(item=>{
-                        return<tr>
-                            <td>{item.label}</td>
-                            <td>{(item.success_rate*100).toFixed(2)}%</td>
-                            <td>{(item.average_steps).toFixed(2)}步</td>
-                            <td>{(item.average_time/1000).toFixed(2)}s</td>
-                            <td>{item.one_click_finish}</td>
-                        </tr>
-                    })
-                }
+                <tbody>
+                    <tr>
+                        <th>级别</th>
+                        <th>成功率</th>
+                        <th>平均步数</th>
+                        <th>平均用时</th>
+                        <th>一次成功次数</th>
+                    </tr>
+                    {
+                        this.state.dataList.map(item=>{
+                            return <tr key={item.label}>
+                                <td>{item.label}</td>
+                                <td>{(item.success_rate*100).toFixed(2)}%</td>
+                                <td>{(item.average_steps).toFixed(2)}步</td>
+                                <td>{(item.average_time/1000).toFixed(2)}s</td>
+                                <td>{item.one_click_finish}</td>
+                            </tr>
+                        })
+                    }
+                </tbody>
             </table>
         </div>
     }
