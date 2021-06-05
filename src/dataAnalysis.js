@@ -65,8 +65,8 @@ export default class DataAnalysis extends Component{
                 HEIGHT:item.height,
                 MINES:item.mines.length,
                 SUCCESS:item.success ? 'Y' : 'N',
-                START_TIME:'\''+item.operation[0].time,
-                ELAPSED_TIME:((item.operation[item.operation.length-1].time-item.operation[0].time)/1000).toFixed(2)
+                START:item.operation[0].time,
+                TIME:((item.operation[item.operation.length-1].time-item.operation[0].time)/1000).toFixed(2)
             });
         }
         saveAs(new Blob([dbf.structure(dbfData).buffer]),'mine.dbf');
