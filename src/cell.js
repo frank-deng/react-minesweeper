@@ -3,6 +3,11 @@ import {Component} from 'react';
 const VALUE_MINE=9;
 export default class GamePage extends Component{
     handleClick=()=>{
+        let status=this.props.status, data=this.props.data,
+            digged=data.value&0x80, marked=data.value&0x40;
+        if('failed'===status || 'success'===status || digged || marked){
+            return;
+        }
         this.props.onDig(this.props.data);
     }
     render(){

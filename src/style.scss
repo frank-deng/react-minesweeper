@@ -219,7 +219,9 @@ code {
         color:#303133;
         border-radius:2px;
         cursor:pointer;
-        &.inactive{
+        &.inactive,
+        &.digged,
+        &.marked{
           cursor: default;
         }
         &.mine{
