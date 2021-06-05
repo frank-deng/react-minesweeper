@@ -1,5 +1,6 @@
 import {Component} from 'react';
 import Dialog from './dialog';
+import { Translation } from 'react-i18next';
 
 const MIN_WIDTH=4;
 const MAX_WIDTH=30;
@@ -141,30 +142,42 @@ export default class SettingDialog extends Component{
   render(){
     let errorMsg=this.state.errorMsg;
     return (
-      <Dialog visible={this.state.display} customClass='settingDialog'>
-        <div className='levelSelection'>
-          <span className='selectLevel' onClick={e=>this.setLevel('beginner')}>初级</span>
-          <span className='selectLevel' onClick={e=>this.setLevel('medium')}>中级</span>
-          <span className='selectLevel' onClick={e=>this.setLevel('expert')}>高级</span>
-        </div>
-        <div className='gameSettingForm'>
-          <div className='formItem'>
-            <span className='itemTitle'>宽度({MIN_WIDTH}-{MAX_WIDTH})</span>
-            <input name='width' autoComplete="off" maxLength='2' value={this.state.width} onInput={this.handleInputChange}/>
+      <Translation>{t=>(
+        <Dialog visible={this.state.display} customClass='settingDialog'>
+          <div className='levelSelection'>
+            <span className='selectLevel' onClick={e=>this.setLevel('beginner')}>{t('Beginner')}</span>
+            <span className='selectLevel' onClick={e=>this.setLevel('medium')}>{t('Middle')}</span>
+            <span className='selectLevel' onClick={e=>this.setLevel('expert')}>{t('Expert')}</span>
           </div>
-          <div className='formItem'>
-            <span className='itemTitle'>高度({MIN_HEIGHT}-{MAX_HEIGHT})</span>
-            <input name='height' autoComplete="off" maxLength='2' value={this.state.height} onInput={this.handleInputChange}/>
-          </div>
-          <div className='formItem'>
-            <span className='itemTitle'>雷数(2-{MAX_WIDTH*MAX_HEIGHT-1})</span>
-            <input name='mines' autoComplete="off" maxLength='3' value={this.state.mines} onInput={this.handleInputChange}/>
-          </div>
-        </div>
-        {errorMsg && <div className='errorMsg'>{errorMsg}</div>}
-        <button className='startGame' onClick={this.startGame}><span>确定</span></button>
-        <button className='cancelSetting' onClick={this.cancelSubmit}><span>取消</span></button>
-      </Dialog>
+          <table className='gameSettingForm'>
+            <colgroup>
+              <col className='columnTitle'/>
+              <col className='columnInput'/>
+            </colgroup>
+            <tr className='formItem'>
+              <td className='itemTitle'>{t('Width')} ({MIN_WIDTH}-{MAX_WIDTH})</td>
+              <td>
+                <input name='width' autoComplete="off" maxLength='2' value={this.state.width} onInput={this.handleInputChange}/>
+              </td>
+            </tr>
+            <tr className='formItem'>
+              <td className='itemTitle'>{t('Height')} ({MIN_HEIGHT}-{MAX_HEIGHT})</td>
+              <td>
+                <input name='height' autoComplete="off" maxLength='2' value={this.state.height} onInput={this.handleInputChange}/>
+              </td>
+            </tr>
+            <tr className='formItem'>
+              <td className='itemTitle'>{t('Mines Count')} (2-{MAX_WIDTH*MAX_HEIGHT-1})</td>
+              <td>
+                <input name='mines' autoComplete="off" maxLength='3' value={this.state.mines} onInput={this.handleInputChange}/>
+              </td>
+            </tr>
+          </table>
+          {errorMsg && <div className='errorMsg'>{errorMsg}</div>}
+          <button className='startGame' onClick={this.startGame}><span>{t('OK')}</span></button>
+          <button className='cancelSetting' onClick={this.cancelSubmit}><span>{t('Cancel')}</span></button>
+        </Dialog>
+      )}</Translation>
     );
   }
 }

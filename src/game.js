@@ -2,6 +2,7 @@ import {Component, createRef} from 'react';
 import Cell from './cell';
 import {writeLog} from './logManager';
 import SettingDialog from './settingDialog.js';
+import { Translation } from 'react-i18next';
 
 export const VALUE_MINE=9;
 export default class GamePage extends Component{
@@ -341,34 +342,36 @@ export default class GamePage extends Component{
       }
     }
     return (
-      <div className="gamePage">
-        <div className="titleBar">
-          <span className='newGame btn-link' onClick={this.startGame}>新游戏</span>
-          <span className='back btn-link' onClick={this.openSetting}>设置</span>
-          <span className='newGame btn-link' onClick={this.openDataAnalysis}>数据分析</span>
-          <span className='steps'>步数：{this.state.operation.length}</span>
-          <span className='remainMines'>剩余雷数：{remainMines}</span>
-          {
-            'success'===status
-            ? <span className='statusLine success'>成功了</span>
-            : 'failed'===status
-            ? <span className='statusLine failed'>失败了</span>
-            : <span className='statusLine'></span>
-          }
-        </div>
-        <div className='gamePadOuter'>
-          <div className='gamePad'>
+      <Translation>{t=>(
+        <div className="gamePage">
+          <div className="titleBar">
+            <span className='newGame btn-link' onClick={this.startGame}>{t('New Game')}</span>
+            <span className='back btn-link' onClick={this.openSetting}>{t('Settings')}</span>
+            <span className='newGame btn-link' onClick={this.openDataAnalysis}>{t('Data Analysis')}</span>
+            <span className='steps'>{t('Steps')}{this.state.operation.length}</span>
+            <span className='remainMines'>{t('Remain')}{remainMines}</span>
             {
-              this.state.board.map(row=><div className='gamePadRow' key={row.key}>
-                {
-                  row.data.map(cell=><Cell data={cell} key={cell.key} onDig={this.handleDig} status={this.state.status}></Cell>)
-                }
-              </div>)
+              'success'===status
+              ? <span className='statusLine success'>{t('Succeed')}</span>
+              : 'failed'===status
+              ? <span className='statusLine failed'>{t('Failed')}</span>
+              : <span className='statusLine'></span>
             }
           </div>
+          <div className='gamePadOuter'>
+            <div className='gamePad'>
+              {
+                this.state.board.map(row=><div className='gamePadRow' key={row.key}>
+                  {
+                    row.data.map(cell=><Cell data={cell} key={cell.key} onDig={this.handleDig} status={this.state.status}></Cell>)
+                  }
+                </div>)
+              }
+            </div>
+          </div>
+          <SettingDialog ref={this.$refs.settingDialog}></SettingDialog>
         </div>
-        <SettingDialog ref={this.$refs.settingDialog}>awdfaw</SettingDialog>
-      </div>
+      )}</Translation>
     );
   }
 }

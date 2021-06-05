@@ -55,16 +55,15 @@ code {
   }
   .gameSettingForm{
     margin:0 auto 10px auto;
-    width:110px;
+    .columnInput{
+      width:30px;
+    }
     .formItem{
       position:relative;
-      padding-left:80px;
       .itemTitle{
-        display:block;
-        position: absolute;
-        left:0;
-        top:0;
         line-height:26px;
+        padding-right:10px;
+        text-align: left;
       }
       input{
         display: block;
@@ -147,13 +146,15 @@ code {
       &.steps{
         min-width:80px;
         text-align:left;
+        margin-right:10px;
       }
       &.remainMines{
         min-width:100px;
         text-align:left;
+        margin-right:10px;
       }
       &.statusLine{
-        width:45px;
+        min-width:45px;
         &.success{
           color:#67C23A;
         }
