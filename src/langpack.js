@@ -16,7 +16,10 @@ export default{
             'Height':'高度',
             'Mines Count':'雷数',
             'OK':'确定',
-            'Cancel':'取消'
+            'Cancel':'取消',
+            'error_width':'宽度值必须为整数',
+            'error_height':'高度值必须为整数',
+            'error_mines':'雷数必须为整数'
         }
     },
     'en':{
@@ -36,12 +39,15 @@ export default{
             'Height':'Height',
             'Mines Count':'Mines',
             'OK':'OK',
-            'Cancel':'Cancel'
+            'Cancel':'Cancel',
+            'error_width':'Width must be integer',
+            'error_height':'Height must be integer',
+            'error_mines':'Mines must be integer'
         }
     },
     'ja':{
         translation:{
-            'Minesweeper':'Minesweeper',
+            'Minesweeper':'マインスイーパ',
             'New Game':'スタート',
             'Data Analysis':'データ解析',
             'Settings':'設定',
@@ -56,7 +62,10 @@ export default{
             'Height':'高さ',
             'Mines Count':'地雷の数',
             'OK':'OK',
-            'Cancel':'キャンセル'
+            'Cancel':'キャンセル',
+            'error_width':'Width must be integer',
+            'error_height':'Height must be integer',
+            'error_mines':'Mines must be integer'
         }
     }
 }

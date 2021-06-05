@@ -72,7 +72,7 @@ export default class DataAnalysis extends Component{
         saveAs(new Blob([dbf.structure(dbfData).buffer]),'mine.dbf');
     }
     goBack=()=>{
-        window.location=window.location.pathname+'#/';
+        window.location='#/';
     }
     render(){
         return <div className='dataAnalysis'>

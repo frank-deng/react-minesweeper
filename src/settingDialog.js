@@ -36,6 +36,7 @@ export default class SettingDialog extends Component{
       });
       this.setState({
         ...param,
+        errorMsg:null,
         display:true
       });
     })
@@ -93,17 +94,17 @@ export default class SettingDialog extends Component{
     let {width,height,mines}=this.state;
     let errorList=[];
     if(!/^\d+$/.test(width)){
-      errorList.push('宽度值必须为整数');
+      errorList.push('error_width');
     }
     if(!/^\d+$/.test(height)){
-      errorList.push('高度值必须为整数');
+      errorList.push('error_height');
     }
     if(!/^\d+$/.test(mines)){
-      errorList.push('雷数必须为整数');
+      errorList.push('error_mines');
     }
     if(errorList.length){
       this.setState({
-        errorMsg:errorList.join('\n')
+        errorMsg:errorList
       });
       return;
     }
@@ -136,7 +137,8 @@ export default class SettingDialog extends Component{
     }
     this.resolve=this.reject=null;
     this.setState({
-      display:false
+      display:false,
+      errorMsg:null
     });
   }
   render(){
@@ -154,26 +156,28 @@ export default class SettingDialog extends Component{
               <col className='columnTitle'/>
               <col className='columnInput'/>
             </colgroup>
-            <tr className='formItem'>
-              <td className='itemTitle'>{t('Width')} ({MIN_WIDTH}-{MAX_WIDTH})</td>
-              <td>
-                <input name='width' autoComplete="off" maxLength='2' value={this.state.width} onInput={this.handleInputChange}/>
-              </td>
-            </tr>
-            <tr className='formItem'>
-              <td className='itemTitle'>{t('Height')} ({MIN_HEIGHT}-{MAX_HEIGHT})</td>
-              <td>
-                <input name='height' autoComplete="off" maxLength='2' value={this.state.height} onInput={this.handleInputChange}/>
-              </td>
-            </tr>
-            <tr className='formItem'>
-              <td className='itemTitle'>{t('Mines Count')} (2-{MAX_WIDTH*MAX_HEIGHT-1})</td>
-              <td>
-                <input name='mines' autoComplete="off" maxLength='3' value={this.state.mines} onInput={this.handleInputChange}/>
-              </td>
-            </tr>
+            <tbody>
+              <tr className='formItem'>
+                <td className='itemTitle'>{t('Width')} ({MIN_WIDTH}-{MAX_WIDTH})</td>
+                <td>
+                  <input name='width' autoComplete="off" maxLength='2' value={this.state.width} onInput={this.handleInputChange}/>
+                </td>
+              </tr>
+              <tr className='formItem'>
+                <td className='itemTitle'>{t('Height')} ({MIN_HEIGHT}-{MAX_HEIGHT})</td>
+                <td>
+                  <input name='height' autoComplete="off" maxLength='2' value={this.state.height} onInput={this.handleInputChange}/>
+                </td>
+              </tr>
+              <tr className='formItem'>
+                <td className='itemTitle'>{t('Mines Count')} (2-{MAX_WIDTH*MAX_HEIGHT-1})</td>
+                <td>
+                  <input name='mines' autoComplete="off" maxLength='3' value={this.state.mines} onInput={this.handleInputChange}/>
+                </td>
+              </tr>
+            </tbody>
           </table>
-          {errorMsg && <div className='errorMsg'>{errorMsg}</div>}
+          {errorMsg && <div className='errorMsg'>{errorMsg.map(t).join('\n')}</div>}
           <button className='startGame' onClick={this.startGame}><span>{t('OK')}</span></button>
           <button className='cancelSetting' onClick={this.cancelSubmit}><span>{t('Cancel')}</span></button>
         </Dialog>

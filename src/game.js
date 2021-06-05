@@ -329,7 +329,7 @@ export default class GamePage extends Component{
     this.startGame();
   }
   openDataAnalysis=()=>{
-    window.location=window.location.pathname+'#/dataAnalysis';
+    window.location='#/dataAnalysis';
   }
   render(){
     let status=this.state.status;
