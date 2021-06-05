@@ -1,4 +1,5 @@
 import {Component} from 'react';
+import { Translation } from 'react-i18next';
 import {readLog} from './logManager';
 import {saveAs} from 'file-saver';
 import './dataAnalysis.scss';
@@ -75,34 +76,36 @@ export default class DataAnalysis extends Component{
         window.location='#/';
     }
     render(){
-        return <div className='dataAnalysis'>
-            <div className='toolbox'>
-                <span className='btn-link' onClick={this.goBack}>返回</span>
-                <span className='btn-link' onClick={this.exportJSON}>导出JSON数据</span>
-                <span className='btn-link' onClick={this.exportDBF}>导出DBF数据</span>
+        return <Translation>{t=>(
+            <div className='dataAnalysis'>
+                <div className='toolbox'>
+                    <span className='btn-link' onClick={this.goBack}>{t('Back')}</span>
+                    <span className='btn-link' onClick={this.exportJSON}>{t('Export JSON')}</span>
+                    <span className='btn-link' onClick={this.exportDBF}>{t('Export DBF')}</span>
+                </div>
+                <table className='mainTable'>
+                    <tbody>
+                        <tr>
+                            <th>级别</th>
+                            <th>成功率</th>
+                            <th>平均步数</th>
+                            <th>平均用时</th>
+                            <th>一次成功次数</th>
+                        </tr>
+                        {
+                            this.state.dataList.map(item=>{
+                                return <tr key={item.label}>
+                                    <td>{item.label}</td>
+                                    <td>{(item.success_rate*100).toFixed(2)}%</td>
+                                    <td>{(item.average_steps).toFixed(2)}步</td>
+                                    <td>{(item.average_time/1000).toFixed(2)}s</td>
+                                    <td>{item.one_click_finish}</td>
+                                </tr>
+                            })
+                        }
+                    </tbody>
+                </table>
             </div>
-            <table className='mainTable'>
-                <tbody>
-                    <tr>
-                        <th>级别</th>
-                        <th>成功率</th>
-                        <th>平均步数</th>
-                        <th>平均用时</th>
-                        <th>一次成功次数</th>
-                    </tr>
-                    {
-                        this.state.dataList.map(item=>{
-                            return <tr key={item.label}>
-                                <td>{item.label}</td>
-                                <td>{(item.success_rate*100).toFixed(2)}%</td>
-                                <td>{(item.average_steps).toFixed(2)}步</td>
-                                <td>{(item.average_time/1000).toFixed(2)}s</td>
-                                <td>{item.one_click_finish}</td>
-                            </tr>
-                        })
-                    }
-                </tbody>
-            </table>
-        </div>
+        )}</Translation>
     }
 }

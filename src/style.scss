@@ -87,6 +87,9 @@ code {
     white-space: pre-line;
     margin-bottom:10px;
   }
+  .footer{
+    white-space: nowrap;
+  }
   .startGame{
     border-radius:15px;
     height:30px;
@@ -130,40 +133,60 @@ code {
   text-align: center;
   .titleBar{
     flex:none;
-    padding:10px;
+    padding:4px 10px 0 10px;
     font-size:14px;
-    text-align: left;
-    span{
+    text-align: center;
+    .btnGroup{
       display: inline-block;
       vertical-align: top;
-      &.btn-link{
+      line-height:22px;
+      margin:0 10px;
+      text-align: left;
+      .btn-link{
+        display: inline-block;
+        vertical-align: top;
         color:#409eff;
         cursor:pointer;
         margin-right:20px;
+        &:last-child{
+          margin-right:0;
+        }
         &:hover{
           color:#66b1ff;
           text-decoration: underline;
         }
       }
-      &.steps{
-        min-width:80px;
+    }
+    .statusGroup{
+      display: inline-block;
+      vertical-align: top;
+      text-align: left;
+      line-height:22px;
+      margin:0 10px;
+      .steps{
+        display: inline-block;
+        vertical-align: top;
         text-align:left;
-        margin-right:10px;
+        margin-right:20px;
       }
-      &.remainMines{
-        min-width:100px;
+      .remainMines{
+        display: inline-block;
+        vertical-align: top;
         text-align:left;
-        margin-right:10px;
       }
-      &.statusLine{
-        min-width:45px;
-        &.success{
-          color:#67C23A;
-        }
-        &.failed{
-          color:#F56C6C;
-        }
-      }
+    }
+  }
+  .statusLine{
+    flex:none;
+    text-align: center;
+    font-size:14px;
+    line-height:18px;
+    min-height: 18px;
+    &.success{
+      color:#67C23A;
+    }
+    &.failed{
+      color:#F56C6C;
     }
   }
   .gamePadOuter{

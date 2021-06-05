@@ -19,7 +19,10 @@ export default{
             'Cancel':'取消',
             'error_width':'宽度值必须为整数',
             'error_height':'高度值必须为整数',
-            'error_mines':'雷数必须为整数'
+            'error_mines':'雷数必须为整数',
+            'Back':'返回',
+            'Export JSON':'导出JSON数据',
+            'Export DBF':'导出DBF数据'
         }
     },
     'en':{
@@ -42,7 +45,10 @@ export default{
             'Cancel':'Cancel',
             'error_width':'Width must be integer',
             'error_height':'Height must be integer',
-            'error_mines':'Mines must be integer'
+            'error_mines':'Mines must be integer',
+            'Back':'Back',
+            'Export JSON':'Export As JSON',
+            'Export DBF':'Export As DBF'
         }
     },
     'ja':{
@@ -63,9 +69,12 @@ export default{
             'Mines Count':'地雷の数',
             'OK':'OK',
             'Cancel':'キャンセル',
-            'error_width':'Width must be integer',
-            'error_height':'Height must be integer',
-            'error_mines':'Mines must be integer'
+            'error_width':'幅は整数でなければなりません',
+            'error_height':'高さは整数でなければなりません',
+            'error_mines':'地雷の数は整数でなければなりません',
+            'Back':'戻る',
+            'Export JSON':'JSONをエクスポート',
+            'Export DBF':'DBFをエクスポート'
         }
     }
 }

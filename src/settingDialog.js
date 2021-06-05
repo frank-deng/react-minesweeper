@@ -178,8 +178,10 @@ export default class SettingDialog extends Component{
             </tbody>
           </table>
           {errorMsg && <div className='errorMsg'>{errorMsg.map(t).join('\n')}</div>}
-          <button className='startGame' onClick={this.startGame}><span>{t('OK')}</span></button>
-          <button className='cancelSetting' onClick={this.cancelSubmit}><span>{t('Cancel')}</span></button>
+          <div className='footer'>
+            <button className='startGame' onClick={this.startGame}><span>{t('OK')}</span></button>
+            <button className='cancelSetting' onClick={this.cancelSubmit}><span>{t('Cancel')}</span></button>
+          </div>
         </Dialog>
       )}</Translation>
     );

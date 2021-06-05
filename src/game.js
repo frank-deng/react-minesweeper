@@ -333,6 +333,15 @@ export default class GamePage extends Component{
   }
   render(){
     let status=this.state.status;
+    let statusClass=status, statusMsg='';
+    switch(status){
+      case 'success':
+        statusMsg='Succeed';
+      break;
+      case 'failed':
+        statusMsg='Failed';
+      break;
+    }
     let remainMines=this.state.mines;
     for(let row of this.state.board){
       for(let cell of row.data){
@@ -345,19 +354,17 @@ export default class GamePage extends Component{
       <Translation>{t=>(
         <div className="gamePage">
           <div className="titleBar">
-            <span className='newGame btn-link' onClick={this.startGame}>{t('New Game')}</span>
-            <span className='back btn-link' onClick={this.openSetting}>{t('Settings')}</span>
-            <span className='newGame btn-link' onClick={this.openDataAnalysis}>{t('Data Analysis')}</span>
-            <span className='steps'>{t('Steps')}{this.state.operation.length}</span>
-            <span className='remainMines'>{t('Remain')}{remainMines}</span>
-            {
-              'success'===status
-              ? <span className='statusLine success'>{t('Succeed')}</span>
-              : 'failed'===status
-              ? <span className='statusLine failed'>{t('Failed')}</span>
-              : <span className='statusLine'></span>
-            }
+            <div class='btnGroup'>
+              <span className='newGame btn-link' onClick={this.startGame}>{t('New Game')}</span>
+              <span className='back btn-link' onClick={this.openSetting}>{t('Settings')}</span>
+              <span className='newGame btn-link' onClick={this.openDataAnalysis}>{t('Data Analysis')}</span>
+            </div>
+            <div class='statusGroup'>
+              <span className='steps'>{t('Steps')}{this.state.operation.length}</span>
+              <span className='remainMines'>{t('Remain')}{remainMines}</span>
+            </div>
           </div>
+          <div className={['statusLine', statusClass].join(' ')}>{statusMsg ? t(statusMsg) : null}</div>
           <div className='gamePadOuter'>
             <div className='gamePad'>
               {
