@@ -329,7 +329,7 @@ export default class GamePage extends Component{
     this.startGame();
   }
   openDataAnalysis=()=>{
-    window.location='#/dataAnalysis';
+    window.open('#/dataAnalysis');
   }
   render(){
     let status=this.state.status;
@@ -354,12 +354,12 @@ export default class GamePage extends Component{
       <Translation>{t=>(
         <div className="gamePage">
           <div className="titleBar">
-            <div class='btnGroup'>
+            <div className='btnGroup'>
               <span className='newGame btn-link' onClick={this.startGame}>{t('New Game')}</span>
               <span className='back btn-link' onClick={this.openSetting}>{t('Settings')}</span>
               <span className='newGame btn-link' onClick={this.openDataAnalysis}>{t('Data Analysis')}</span>
             </div>
-            <div class='statusGroup'>
+            <div className='statusGroup'>
               <span className='steps'>{t('Steps')}{this.state.operation.length}</span>
               <span className='remainMines'>{t('Remain')}{remainMines}</span>
             </div>

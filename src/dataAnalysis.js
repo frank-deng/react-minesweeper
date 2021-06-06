@@ -20,15 +20,15 @@ export default class DataAnalysis extends Component{
             dataRaw,
             dataList:[
                 {
-                    label:'初级',
+                    label:'Beginner',
                     ...this.getStatResult(listLow)
                 },
                 {
-                    label:'中级',
+                    label:'Middle',
                     ...this.getStatResult(listMid)
                 },
                 {
-                    label:'高级',
+                    label:'Expert',
                     ...this.getStatResult(listHigh)
                 }
             ]
@@ -73,31 +73,32 @@ export default class DataAnalysis extends Component{
         saveAs(new Blob([dbf.structure(dbfData).buffer]),'mine.dbf');
     }
     goBack=()=>{
+        window.close();
         window.location='#/';
     }
     render(){
         return <Translation>{t=>(
             <div className='dataAnalysis'>
                 <div className='toolbox'>
-                    <span className='btn-link' onClick={this.goBack}>{t('Back')}</span>
+                    <span className='btn-link' onClick={this.goBack}>{t('Close')}</span>
                     <span className='btn-link' onClick={this.exportJSON}>{t('Export JSON')}</span>
                     <span className='btn-link' onClick={this.exportDBF}>{t('Export DBF')}</span>
                 </div>
                 <table className='mainTable'>
                     <tbody>
                         <tr>
-                            <th>级别</th>
-                            <th>成功率</th>
-                            <th>平均步数</th>
-                            <th>平均用时</th>
-                            <th>一次成功次数</th>
+                            <th>{t('Level')}</th>
+                            <th>{t('Success Rate')}</th>
+                            <th>{t('Average Steps')}</th>
+                            <th>{t('Average Time')}</th>
+                            <th>{t('One-step Success Times')}</th>
                         </tr>
                         {
                             this.state.dataList.map(item=>{
                                 return <tr key={item.label}>
-                                    <td>{item.label}</td>
+                                    <td>{t(item.label)}</td>
                                     <td>{(item.success_rate*100).toFixed(2)}%</td>
-                                    <td>{(item.average_steps).toFixed(2)}步</td>
+                                    <td>{(item.average_steps).toFixed(2)}</td>
                                     <td>{(item.average_time/1000).toFixed(2)}s</td>
                                     <td>{item.one_click_finish}</td>
                                 </tr>

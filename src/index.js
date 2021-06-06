@@ -33,7 +33,6 @@ ReactDOM.render(
     <HashRouter>
       <Route path="/" exact component={GamePage}></Route>
       <Route path="/dataAnalysis" exact component={DataAnalysis}></Route>
-      <Redirect to="/" from='*'/>
     </HashRouter>
   </React.StrictMode>,
   document.getElementById('root')

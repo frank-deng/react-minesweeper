@@ -21,8 +21,14 @@ export default{
             'error_height':'高度值必须为整数',
             'error_mines':'雷数必须为整数',
             'Back':'返回',
+            'Close':'关闭',
             'Export JSON':'导出JSON数据',
-            'Export DBF':'导出DBF数据'
+            'Export DBF':'导出DBF数据',
+            'Level':'级别',
+            'Success Rate':'成功率',
+            'Average Steps':'平均步数',
+            'Average Time':'平均用时',
+            'One-step Success Times':'一步成功次数',
         }
     },
     'en':{
@@ -47,8 +53,15 @@ export default{
             'error_height':'Height must be integer',
             'error_mines':'Mines must be integer',
             'Back':'Back',
+            'Close':'Close',
             'Export JSON':'Export As JSON',
-            'Export DBF':'Export As DBF'
+            'Export DBF':'Export As DBF',
+            'Level':'Level',
+            'Success Rate':'Success Rate',
+            'Average Steps':'Avg. Steps',
+            'Average Time':'Avg. Time',
+            'Average Time':'Avg. Time',
+            'One-step Success Times':'One-step Success Times',
         }
     },
     'ja':{
@@ -73,8 +86,14 @@ export default{
             'error_height':'高さは整数でなければなりません',
             'error_mines':'地雷の数は整数でなければなりません',
             'Back':'戻る',
+            'Close':'閉じる',
             'Export JSON':'JSONをエクスポート',
-            'Export DBF':'DBFをエクスポート'
+            'Export DBF':'DBFをエクスポート',
+            'Level':'レベル',
+            'Success Rate':'成功率',
+            'Average Steps':'平均操作回数',
+            'Average Time':'平均時間',
+            'One-step Success Times':'一回操作で成功の回数',
         }
     }
 }
