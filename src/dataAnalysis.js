@@ -61,11 +61,10 @@ export default class DataAnalysis extends Component{
         let dbfData=[];
         for(let item of this.state.dataRaw){
             dbfData.push({
-                ID:item.id,
                 WIDTH:item.width,
                 HEIGHT:item.height,
                 MINES:item.mines.length,
-                SUCCESS:item.success ? 'Y' : 'N',
+                SUCCESS:item.success ? 1 : 0,
                 STEPS:item.operation.length,
                 START:item.operation[0].time,
                 TIME:(item.operation[item.operation.length-1].time-item.operation[0].time)
