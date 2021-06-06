@@ -93,7 +93,7 @@ export default{
             'Success Rate':'成功率',
             'Average Steps':'平均操作回数',
             'Average Time':'平均時間',
-            'One-step Success Times':'一回操作で成功の回数',
+            'One-step Success Times':'一回の操作で成功できるの回数',
         }
     }
 }
