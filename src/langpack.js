@@ -29,6 +29,8 @@ export default{
             'Average Steps':'平均步数',
             'Average Time':'平均用时',
             'One-step Success Times':'一步成功次数',
+            'Clear Data':'清除数据',
+            '_confirmDeleteGameData':'本操作将删除所有的游戏记录！\n是否继续？'
         }
     },
     'en':{
@@ -62,6 +64,8 @@ export default{
             'Average Time':'Avg. Time',
             'Average Time':'Avg. Time',
             'One-step Success Times':'One-step Success Times',
+            'Clear Data':'Clear Data',
+            '_confirmDeleteGameData':'This option will delete ALL the game records!\nContinue?'
         }
     },
     'ja':{
@@ -94,6 +98,8 @@ export default{
             'Average Steps':'平均操作回数',
             'Average Time':'平均時間',
             'One-step Success Times':'一回の操作で成功できるの回数',
+            'Clear Data':'データを削除',
+            '_confirmDeleteGameData':'この操作はすべてのゲーム履歴を削除します。\n続けますか？'
         }
     }
 }

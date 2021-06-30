@@ -8,6 +8,12 @@
           color:#409eff;
           cursor:pointer;
           margin:0 10px;
+          &.danger{
+            color:#f56c6c;
+            &:hover{
+              color:#f78989;
+            }
+          }
           &:hover{
             color:#66b1ff;
             text-decoration: underline;
@@ -25,4 +31,50 @@
             padding:0 10px;
         }
     }
+}
+.confirmDeleteDialog{
+  background-color: #ffffff;
+  border-radius: 4px;
+  position:absolute;
+  min-width:220px;
+  top:50px;
+  left:50%;
+  transform: translateX(-50%);
+  white-space: pre-line;
+  text-align: center;
+  padding:10px 20px;
+  color:#f56c6c;
+  .warningSign{
+    font-size:60px;
+    line-height:60px;
+  }
+  .warningMessage{
+    font-size: 14px;
+    line-height: 18px;
+    margin:10px 0;
+  }
+  button{
+    border-radius: 15px;
+    height: 30px;
+    line-height: 30px;
+    padding: 0 20px;
+    cursor: pointer;
+    color: #409eff;
+    background: #ffffff;
+    border: 1px solid #409eff;
+    &:hover{
+      border-color:#66b1ff;
+      color:#66b1ff;
+    }
+    &.confirmDelete{
+      color: #ffffff;
+      background:#f56c6c;
+      border-color: #f56c6c;
+      margin-right:10px;
+      &:hover{
+        border-color:#f78989;
+        background:#f78989;
+      }
+    }
+  }
 }

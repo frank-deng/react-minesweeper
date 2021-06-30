@@ -1,15 +1,20 @@
 import {Component} from 'react';
 import { Translation } from 'react-i18next';
-import {readLog} from './logManager';
+import {readLog, clearLog} from './logManager';
 import {saveAs} from 'file-saver';
+import Dialog from './dialog';
 import './dataAnalysis.scss';
 import dbf from 'dbf';
 export default class DataAnalysis extends Component{
     state={
+        confirmDeleteDialog:false,
         dataRaw:null,
         dataList:[]
     };
     componentWillMount(){
+        this.loadLogData();
+    }
+    loadLogData(){
         let dataRaw = readLog();
         let listLow = dataRaw.filter(item=>(10===item.width && 10===item.height && 10===item.mines.length));
         let listMid = dataRaw.filter(item=>(16===item.width && 16===item.height && 40===item.mines.length));
@@ -72,6 +77,23 @@ export default class DataAnalysis extends Component{
         }
         saveAs(new Blob([dbf.structure(dbfData).buffer]),'mine.dbf');
     }
+    clearData=()=>{
+        this.setState({
+            confirmDeleteDialog:true
+        });
+    }
+    cancelDelete=()=>{
+        this.setState({
+            confirmDeleteDialog:false
+        });
+    }
+    confirmDelete=()=>{
+        this.setState({
+            confirmDeleteDialog:false
+        });
+        clearLog();
+        this.loadLogData();
+    }
     goBack=()=>{
         window.close();
         window.location='#/';
@@ -83,6 +105,7 @@ export default class DataAnalysis extends Component{
                     <span className='btn-link' onClick={this.goBack}>{t('Close')}</span>
                     <span className='btn-link' onClick={this.exportJSON}>{t('Export JSON')}</span>
                     <span className='btn-link' onClick={this.exportDBF}>{t('Export DBF')}</span>
+                    <span className='btn-link' onClick={this.clearData}>{t('Clear Data')}</span>
                 </div>
                 <table className='mainTable'>
                     <tbody>
@@ -106,6 +129,12 @@ export default class DataAnalysis extends Component{
                         }
                     </tbody>
                 </table>
+                <Dialog visible={this.state.confirmDeleteDialog}  customClass='confirmDeleteDialog'>
+                    <div className='warningSign'>⚠</div>
+                    <div className='warningMessage'>{t('_confirmDeleteGameData')}</div>
+                    <button className='confirmDelete' onClick={this.confirmDelete}>{t('OK')}</button>
+                    <button className='cancelDelete' onClick={this.cancelDelete}>{t('Cancel')}</button>
+                </Dialog>
             </div>
         )}</Translation>
     }

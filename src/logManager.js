@@ -51,3 +51,6 @@ export function readLog(){
     }
     return storageData;
 }
+export function clearLog(){
+    localStorage.removeItem('react-minesweeper-log');
+}
