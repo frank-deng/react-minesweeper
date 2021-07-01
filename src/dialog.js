@@ -10,8 +10,7 @@ export default class Dialog extends Component{
     let visible=this.props.visible;
     //切换body上的容器的新建和销毁
     if(!visible && this.container){
-      let body = document.body;
-      body.removeChild(this.container);
+      document.body.removeChild(this.container);
       this.container=null;
     }else if(visible && !this.container){
       let body = document.body;
@@ -37,6 +36,12 @@ export default class Dialog extends Component{
       <div className={classList.join(' ')}>{this.props.children}</div>,
       this.container
     );
+  }
+  componentWillUnmount(){
+    if(this.container){
+      document.body.removeChild(this.container);
+      this.container=null;
+    }
   }
   render(){
     return null;
