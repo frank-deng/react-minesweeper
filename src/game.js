@@ -1,6 +1,6 @@
 import {Component, createRef} from 'react';
 import Cell from './cell';
-import {findCertainActions} from './solver';
+import {findCertainActions, findCertainActionsByEnumeration} from './solver';
 import {writeLog} from './logManager';
 import SettingDialog from './settingDialog.js';
 import { Translation } from 'react-i18next';
@@ -166,10 +166,14 @@ export default class GamePage extends Component{
   //初始只检查 seed（本次点击的格子）周围，之后只重查“状态发生过变化的格子”周围的数字格，
   //一次调用跑到不动点，不再依赖外部反复调用。
   //不传 seed 时退化为全盘检查，供没有外部状态的调用方使用。
-  autoproc(target,seed){
+  autoproc(target,seed,mines){
     let rows=target.length, cols=target[0].data.length;
     let failed=false;
     let dirty=new Set(), pending=[];
+    //已产生的动作数，用来判断本轮是否有进展
+    let actions=0;
+    //盘面已标旗数，-1 表示还没统计过
+    let flagCount=-1;
 
     const cellOf=id=>({row:Math.floor(id/cols), col:id%cols});
 
@@ -193,6 +197,7 @@ export default class GamePage extends Component{
       if(0===ret){
         return ret;
       }
+      actions++;
       touch(row,col);
       if(0===(target[row].data[col].value&0x0f)){
         pending.push(row*cols+col);
@@ -203,6 +208,10 @@ export default class GamePage extends Component{
     //标旗后，周围数字格的未知块数发生变化，需要重新检查
     const markCell=(row,col)=>{
       this.mark(target,row,col);
+      actions++;
+      if(flagCount>=0){
+        flagCount++;
+      }
       touch(row,col);
     };
 
@@ -264,7 +273,34 @@ export default class GamePage extends Component{
       }
     }
 
+    //剩余雷数 = 总雷数 - 已标旗数。首次需要时统计一次，之后按标旗动作增量维护
+    const getMinesLeft=()=>{
+      if('number'!==typeof mines){
+        return undefined;
+      }
+      if(flagCount<0){
+        flagCount=0;
+        for(let row=0; row<rows; row++){
+          for(let col=0; col<cols; col++){
+            if(0x40&target[row].data[col].value){
+              flagCount++;
+            }
+          }
+        }
+      }
+      return mines-flagCount;
+    };
+
+    const applyActions=({marks,digs})=>{
+      marks.forEach(({row,col})=>markCell(row,col));
+      digs.forEach(({row,col})=>digCell(row,col));
+      flushPending();
+    };
+
     while(!failed){
+      let before=actions;
+
+      //规则1、2：只看脏集，脏集空说明这几条规则已经推不动了
       while(dirty.size && !failed){
         let id=dirty.values().next().value;
         dirty.delete(id);
@@ -275,15 +311,25 @@ export default class GamePage extends Component{
       if(failed){
         break;
       }
+      if(actions>before){
+        continue;
+      }
 
       //子集规则：某个数字格的未知邻居是另一个数字格未知邻居的子集时，用差集推断确定的雷和安全格
-      let {marks, digs}=findCertainActions(target);
-      if(!marks.length && !digs.length){
-        break;
+      let subset=findCertainActions(target);
+      if(subset.marks.length || subset.digs.length){
+        applyActions(subset);
+        continue;
       }
-      marks.forEach(({row,col})=>markCell(row,col));
-      digs.forEach(({row,col})=>digCell(row,col));
-      flushPending();
+
+      //边界枚举：穷举边界上所有布雷方案，再用全局剩余雷数筛掉凑不出总数的方案
+      let exact=findCertainActionsByEnumeration(target,getMinesLeft());
+      if(exact.marks.length || exact.digs.length){
+        applyActions(exact);
+        continue;
+      }
+
+      break;
     }
 
     //推理过程中挖到雷，说明盘面上的旗子标错了
@@ -329,7 +375,7 @@ export default class GamePage extends Component{
     //自动推理，一次调用跑到不动点
     if('running'===status){
         //推理时挖到雷，说明盘面上的旗子标错了
-        if(this.autoproc(board,data)){
+        if(this.autoproc(board,data,state.mines)){
             status='failed';
         }
     }
