@@ -1,5 +1,6 @@
 import {Component, createRef} from 'react';
 import Cell from './cell';
+import {findCertainActions} from './solver';
 import {writeLog} from './logManager';
 import SettingDialog from './settingDialog.js';
 import { Translation } from 'react-i18next';
@@ -228,6 +229,18 @@ export default class GamePage extends Component{
       }
     }
 
+    //子集规则：某个数字格的未知邻居是另一个数字格未知邻居的子集时，用差集推断确定的雷和安全格
+    let {marks, digs} = findCertainActions(target);
+    marks.forEach(({row,col})=>{
+      this.mark(target,row,col);
+      further=true;
+    });
+    digs.forEach(({row,col})=>{
+      if(this.dig(target,row,col)){
+        further=true;
+      }
+    });
+
     return further;
   }
   gameFinished(target){
@@ -298,7 +311,7 @@ export default class GamePage extends Component{
     if('failed'===status || 'success'===status){
       writeLog(board,operation,'success'===status);
     }
-    
+
     this.setState({
       ...state,
       operation,
