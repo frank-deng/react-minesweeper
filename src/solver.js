@@ -123,6 +123,10 @@ export function findCertainActions(board) {
 //专家局边界约 300 格时，5 万节点约 4ms，再往上加收益迅速变小。
 const ENUM_NODE_LIMIT = 50000;
 
+//算最佳猜测时可以放宽预算，这是用户主动触发的一次性操作。
+//实测 8 万节点约 7ms，再往上加优势已经在噪声范围内。
+const HINT_NODE_LIMIT = 80000;
+
 //枚举一个连通分量内所有满足约束的布雷方案，
 //按“雷数”分组累加统计，避免把每个方案都存下来。
 //order 是赋值顺序：越紧的约束里的变量越先赋值，剪枝能更早生效。
@@ -155,7 +159,7 @@ function enumerateComponent(vars, cons, varCons, order, budget) {
     };
 
     const rec = pos => {
-        if (overflow || ++budget.nodes > ENUM_NODE_LIMIT) {
+        if (overflow || ++budget.nodes > budget.limit) {
             overflow = true;
             return;
         }
@@ -193,98 +197,92 @@ function enumerateComponent(vars, cons, varCons, order, budget) {
     return {groups, overflow, n};
 }
 
-//边界枚举：
-//把每个已挖开数字格当作一条约束，穷举边界上所有满足约束的布雷方案，
-//再用“全局剩余雷数”筛掉凑不出总雷数的方案。
-//在所有可行方案中都是雷的格子一定可以标旗，在所有可行方案中都安全的格子一定可以挖开。
-//minesLeft 是剩余雷数（总雷数 - 已标旗数），不传则只用分量内部约束。
-export function findCertainActionsByEnumeration(board, minesLeft) {
+//把边界拆成互不影响的连通分量，并逐分量枚举出所有布雷方案
+function analyzeFrontier(board, nodeLimit) {
     let rows = board.length, cols = board[0].data.length;
-    let result = {marks: [], digs: []};
     let constraints = collectConstraints(board);
-    if (!constraints.length) {
-        return result;
-    }
+    let varIds = [], comps = [];
 
-    //边界格统一编号
-    let indexOf = new Map(), varIds = [];
-    for (let constraint of constraints) {
-        for (let id of constraint.unknown) {
-            if (!indexOf.has(id)) {
-                indexOf.set(id, varIds.length);
-                varIds.push(id);
+    if (constraints.length) {
+        //边界格统一编号
+        let indexOf = new Map();
+        for (let constraint of constraints) {
+            for (let id of constraint.unknown) {
+                if (!indexOf.has(id)) {
+                    indexOf.set(id, varIds.length);
+                    varIds.push(id);
+                }
             }
         }
-    }
 
-    //约束转成变量下标
-    let cons = constraints.map(constraint => ({
-        vars: [...constraint.unknown].map(id => indexOf.get(id)),
-        mines: constraint.mineCount
-    }));
-    let varCons = Array.from({length: varIds.length}, () => []);
-    cons.forEach((constraint, index) => {
-        constraint.vars.forEach(v => varCons[v].push(index));
-    });
+        //约束转成变量下标
+        let cons = constraints.map(constraint => ({
+            vars: [...constraint.unknown].map(id => indexOf.get(id)),
+            mines: constraint.mineCount
+        }));
+        let varCons = Array.from({length: varIds.length}, () => []);
+        cons.forEach((constraint, index) => {
+            constraint.vars.forEach(v => varCons[v].push(index));
+        });
 
-    //约束按“共享变量”拆成互不影响的连通分量
-    let compOfCons = new Array(cons.length).fill(-1);
-    let comps = [];
-    for (let i = 0; i < cons.length; i++) {
-        if (compOfCons[i] >= 0) {
-            continue;
-        }
-        let comp = {cons: [], vars: [], groups: null, overflow: false, n: 0};
-        let stack = [i], varSet = new Set();
-        compOfCons[i] = comps.length;
-        while (stack.length) {
-            let index = stack.pop();
-            comp.cons.push(index);
-            for (let v of cons[index].vars) {
-                if (varSet.has(v)) {
-                    continue;
-                }
-                varSet.add(v);
-                for (let next of varCons[v]) {
-                    if (compOfCons[next] < 0) {
-                        compOfCons[next] = comps.length;
-                        stack.push(next);
+        //约束按“共享变量”拆成互不影响的连通分量
+        let compOfCons = new Array(cons.length).fill(-1);
+        for (let i = 0; i < cons.length; i++) {
+            if (compOfCons[i] >= 0) {
+                continue;
+            }
+            let comp = {cons: [], vars: [], groups: null, overflow: false, n: 0};
+            let stack = [i], varSet = new Set();
+            compOfCons[i] = comps.length;
+            while (stack.length) {
+                let index = stack.pop();
+                comp.cons.push(index);
+                for (let v of cons[index].vars) {
+                    if (varSet.has(v)) {
+                        continue;
+                    }
+                    varSet.add(v);
+                    for (let next of varCons[v]) {
+                        if (compOfCons[next] < 0) {
+                            compOfCons[next] = comps.length;
+                            stack.push(next);
+                        }
                     }
                 }
             }
+            comp.vars = [...varSet];
+            comps.push(comp);
         }
-        comp.vars = [...varSet];
-        comps.push(comp);
-    }
 
-    //逐个分量枚举，所有分量共享同一份节点预算
-    let budget = {nodes: 0};
-    comps.forEach(comp => {
-        let local = new Map();
-        comp.vars.forEach((v, i) => local.set(v, i));
-        let localCons = comp.cons.map(index => ({
-            vars: cons[index].vars.map(v => local.get(v)),
-            mines: cons[index].mines
-        }));
-        let localVarCons = comp.vars.map(() => []);
-        localCons.forEach((constraint, index) => {
-            constraint.vars.forEach(v => localVarCons[v].push(index));
+        //逐个分量枚举，所有分量共享同一份节点预算
+        let budget = {nodes: 0, limit: nodeLimit};
+        comps.forEach(comp => {
+            let local = new Map();
+            comp.vars.forEach((v, i) => local.set(v, i));
+            let localCons = comp.cons.map(index => ({
+                vars: cons[index].vars.map(v => local.get(v)),
+                mines: cons[index].mines
+            }));
+            let localVarCons = comp.vars.map(() => []);
+            localCons.forEach((constraint, index) => {
+                constraint.vars.forEach(v => localVarCons[v].push(index));
+            });
+            //变量排序：所属约束最小的先赋值
+            let tightness = localVarCons.map(list => {
+                let size = Infinity;
+                for (let index of list) {
+                    size = Math.min(size, localCons[index].vars.length);
+                }
+                return size;
+            });
+            let order = comp.vars.map((v, i) => i);
+            order.sort((a, b) => tightness[a] - tightness[b]);
+            let enumerated = enumerateComponent(comp.vars, localCons, localVarCons, order, budget);
+            comp.groups = enumerated.groups;
+            comp.overflow = enumerated.overflow;
+            comp.n = enumerated.n;
         });
-        //变量排序：所属约束最小的先赋值
-        let tightness = localVarCons.map(list => {
-            let size = Infinity;
-            for (let index of list) {
-                size = Math.min(size, localCons[index].vars.length);
-            }
-            return size;
-        });
-        let order = comp.vars.map((v, i) => i);
-        order.sort((a, b) => tightness[a] - tightness[b]);
-        let enumerated = enumerateComponent(comp.vars, localCons, localVarCons, order, budget);
-        comp.groups = enumerated.groups;
-        comp.overflow = enumerated.overflow;
-        comp.n = enumerated.n;
-    });
+    }
 
     //不与任何数字格相邻的未挖开格，放几颗雷都行，只是要凑够总雷数
     let frontier = new Set(varIds);
@@ -297,6 +295,21 @@ export function findCertainActionsByEnumeration(board, minesLeft) {
             }
             freeCells++;
         }
+    }
+
+    return {rows, cols, comps, varIds, freeCells};
+}
+
+//边界枚举：
+//把每个已挖开数字格当作一条约束，穷举边界上所有满足约束的布雷方案，
+//再用“全局剩余雷数”筛掉凑不出总雷数的方案。
+//在所有可行方案中都是雷的格子一定可以标旗，在所有可行方案中都安全的格子一定可以挖开。
+//minesLeft 是剩余雷数（总雷数 - 已标旗数），不传则只用分量内部约束。
+export function findCertainActionsByEnumeration(board, minesLeft) {
+    let {cols, comps, varIds, freeCells} = analyzeFrontier(board, ENUM_NODE_LIMIT);
+    let result = {marks: [], digs: []};
+    if (!comps.length) {
+        return result;
     }
 
     //有分量枚举超限时，全局雷数无法精确合并，退化为只看分量自身约束
@@ -379,4 +392,187 @@ export function findCertainActionsByEnumeration(board, minesLeft) {
     }
 
     return result;
+}
+
+//除 skip 之外，其他分量加上自由格能凑出 k 颗雷的相对权重（已乘上方案数）
+function combineOthers(comps, skip, freeW, minesLeft) {
+    let weight = new Float64Array(minesLeft + 1);
+    weight[0] = 1;
+    for (let comp of comps) {
+        if (comp === skip || comp.overflow) {
+            continue;
+        }
+        let next = new Float64Array(minesLeft + 1);
+        for (let k = 0; k <= minesLeft; k++) {
+            if (!weight[k]) {
+                continue;
+            }
+            for (let [mineCount, group] of comp.groups) {
+                if (k + mineCount <= minesLeft) {
+                    next[k + mineCount] += weight[k] * group.count;
+                }
+            }
+        }
+        weight = next;
+    }
+
+    let result = new Float64Array(minesLeft + 1);
+    for (let k = 0; k <= minesLeft; k++) {
+        if (!weight[k]) {
+            continue;
+        }
+        for (let m = 0; m < freeW.length && k + m <= minesLeft; m++) {
+            result[k + m] += weight[k] * freeW[m];
+        }
+    }
+    return result;
+}
+
+//枚举不可用时的退路：按邻接约束里最紧的那个估计危险度，挑最不危险的格子
+function pickByDensity(board, rows, cols, minesLeft) {
+    //不与数字格相邻的格子不受任何约束，只能按全局剩余雷密度估
+    let unknown = 0;
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (!(0xC0 & board[row].data[col].value)) {
+                unknown++;
+            }
+        }
+    }
+    let global = ('number' === typeof minesLeft && unknown > 0) ? minesLeft / unknown : 0;
+
+    let best = null;
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (0xC0 & board[row].data[col].value) {
+                continue;
+            }
+            let risk = null;
+            for (let {row: row1, col: col1} of getNeighbourCoords(rows, cols, row, col)) {
+                let cell = board[row1].data[col1];
+                if (!(0x80 & cell.value) || VALUE_MINE === (cell.value & 0x0f)) {
+                    continue;
+                }
+                let counter = cell.value & 0x0f, marked = 0, unopened = 0;
+                for (let {row: row2, col: col2} of getNeighbourCoords(rows, cols, row1, col1)) {
+                    let value = board[row2].data[col2].value;
+                    if (0x40 & value) {
+                        marked++;
+                    } else if (!(0x80 & value)) {
+                        unopened++;
+                    }
+                }
+                if (unopened > 0) {
+                    let local = (counter - marked) / unopened;
+                    risk = null === risk ? local : Math.max(risk, local);
+                }
+            }
+            if (null === risk) {
+                risk = global;
+            }
+            if (!best || risk < best.probability) {
+                best = {row, col, probability: risk};
+            }
+        }
+    }
+    return best;
+}
+
+//按枚举结果算出每个格子的雷概率，挑概率最低的那个
+function pickSafest(board, rows, cols, comps, varIds, freeCells, minesLeft) {
+    //自由格放 m 颗雷的方案数为 C(freeCells, m)，归一化后参与加权
+    let maxFree = Math.min(freeCells, minesLeft);
+    let freeW = new Float64Array(maxFree + 1);
+    freeW[0] = 1;
+    let peak = 1;
+    for (let m = 1; m <= maxFree; m++) {
+        freeW[m] = freeW[m - 1] * (freeCells - m + 1) / m;
+        peak = Math.max(peak, freeW[m]);
+    }
+    for (let m = 0; m <= maxFree; m++) {
+        freeW[m] /= peak;
+    }
+
+    //枚举超限的分量拿不到精确比例，直接跳过，不影响其他分量的结论
+    let usable = comps.filter(comp => !comp.overflow);
+    if (!usable.length) {
+        return null;
+    }
+    let exact = usable.length === comps.length;
+
+    let best = null, boundaryMines = 0;
+    usable.forEach(comp => {
+        let others = combineOthers(usable, comp, freeW, minesLeft);
+        let total = 0;
+        for (let [mineCount, group] of comp.groups) {
+            let rest = minesLeft - mineCount;
+            if (rest < 0 || rest >= others.length) {
+                continue;
+            }
+            total += group.count * others[rest];
+        }
+        if (!(total > 0)) {
+            return;
+        }
+
+        //该分量每个格子在所有可行方案里是雷的比例
+        for (let j = 0; j < comp.n; j++) {
+            let times = 0;
+            for (let [mineCount, group] of comp.groups) {
+                let rest = minesLeft - mineCount;
+                if (rest < 0 || rest >= others.length) {
+                    continue;
+                }
+                times += group.ones[j] * others[rest];
+            }
+            let probability = times / total;
+            if (!best || probability < best.probability) {
+                let id = varIds[comp.vars[j]];
+                best = {row: Math.floor(id / cols), col: id % cols, probability};
+            }
+        }
+
+        let expected = 0;
+        for (let [mineCount, group] of comp.groups) {
+            let rest = minesLeft - mineCount;
+            if (rest < 0 || rest >= others.length) {
+                continue;
+            }
+            expected += mineCount * group.count * others[rest];
+        }
+        boundaryMines += expected / total;
+    });
+
+    //只有所有分量都精确时，才敢把“剩余雷均摊到自由格”当作自由格的风险
+    if (exact && freeCells > 0) {
+        let probability = Math.max(0, Math.min(1, (minesLeft - boundaryMines) / freeCells));
+        if (!best || probability < best.probability) {
+            let frontier = new Set(varIds);
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    let value = board[row].data[col].value;
+                    if ((0xC0 & value) || frontier.has(row * cols + col)) {
+                        continue;
+                    }
+                    return {row, col, probability};
+                }
+            }
+        }
+    }
+
+    return best;
+}
+
+//在所有未知格里挑出最安全的一个（是雷概率最低），用于没有确定解时的猜测。
+//返回 {row, col, probability}，probability 是这颗格子是雷的概率。
+export function findSafestCell(board, minesLeft, nodeLimit) {
+    let limit = 'number' === typeof nodeLimit ? nodeLimit : HINT_NODE_LIMIT;
+    let {rows, cols, comps, varIds, freeCells} = analyzeFrontier(board, limit);
+
+    let best = null;
+    if ('number' === typeof minesLeft && minesLeft >= 0) {
+        best = pickSafest(board, rows, cols, comps, varIds, freeCells, minesLeft);
+    }
+    //边界太大枚举不完时，退回按局部雷密度估算
+    return best || pickByDensity(board, rows, cols, minesLeft);
 }

@@ -1,6 +1,6 @@
 import {Component, createRef} from 'react';
 import Cell from './cell';
-import {findCertainActions, findCertainActionsByEnumeration} from './solver';
+import {findCertainActions, findCertainActionsByEnumeration, findSafestCell} from './solver';
 import {writeLog} from './logManager';
 import SettingDialog from './settingDialog.js';
 import { Translation } from 'react-i18next';
@@ -441,6 +441,26 @@ export default class GamePage extends Component{
   openDataAnalysis=()=>{
     window.open('#/dataAnalysis');
   }
+  //没有确定解时，算出每颗未知格是雷的概率，挖开最安全的那颗
+  hint=()=>{
+    let state=this.state;
+    if('initial'===state.status || 'failed'===state.status || 'success'===state.status){
+      return;
+    }
+    let flags=0;
+    for(let row of state.board){
+      for(let cell of row.data){
+        if(0x40&cell.value){
+          flags++;
+        }
+      }
+    }
+    let best=findSafestCell(state.board,state.mines-flags);
+    if(!best){
+      return;
+    }
+    this.handleDig({row:best.row, col:best.col});
+  }
   render(){
     let status=this.state.status;
     let statusClass=status, statusMsg='';
@@ -468,6 +488,7 @@ export default class GamePage extends Component{
               <span className='newGame btn-link' onClick={this.startGame}>{t('New Game')}</span>
               <span className='back btn-link' onClick={this.openSetting}>{t('Settings')}</span>
               <span className='newGame btn-link' onClick={this.openDataAnalysis}>{t('Data Analysis')}</span>
+              <span className='hint btn-link' onClick={this.hint}>{t('Hint')}</span>
             </div>
             <div className='statusGroup'>
               <span className='steps'>{t('Steps')}{this.state.operation.length}</span>
