@@ -162,86 +162,132 @@ export default class GamePage extends Component{
   mark(target,row,col){
       target[row].data[col].value |= 0x40;
   }
-  autoproc(target){
+  //自动推理：脏集驱动。
+  //初始只检查 seed（本次点击的格子）周围，之后只重查“状态发生过变化的格子”周围的数字格，
+  //一次调用跑到不动点，不再依赖外部反复调用。
+  //不传 seed 时退化为全盘检查，供没有外部状态的调用方使用。
+  autoproc(target,seed){
     let rows=target.length, cols=target[0].data.length;
-    let further=false;
+    let failed=false;
+    let dirty=new Set(), pending=[];
 
-    //找到空方块，然后挖开周围方块；找到周边未挖开块数等于当前块雷数的块，然后把周围块标上
-    for(let row=0; row<rows; row++){
-      for(let col=0; col<cols; col++){
-        let cell=target[row].data[col], counter=cell.value&0x0f;
-        if(VALUE_MINE===counter || !(0xC0 & cell.value)){
-          continue;
+    const cellOf=id=>({row:Math.floor(id/cols), col:id%cols});
+
+    //把某个格子及其周围已挖开的数字格加入待检查集合
+    const touch=(row,col)=>{
+      [{row,col}, ...this.getNeighbours(rows,cols,row,col)].forEach(({row:row1,col:col1})=>{
+        let cell=target[row1].data[col1];
+        if((0x80&cell.value) && VALUE_MINE!==(cell.value&0x0f)){
+          dirty.add(row1*cols+col1);
         }
-        let neighbours=this.getNeighbours(rows,cols,row,col).filter(({row,col})=>{
-            let cell=target[row].data[col];
-            return !(0x80&cell.value);
-        });
-        if(0===counter){
-          neighbours.forEach(({row,col})=>{
-              if(this.dig(target,row,col)){
-                  further=true;
-              }
-          });
-        }else if(neighbours.length === counter){
-          neighbours.forEach(({row,col})=>{
-              this.mark(target,row,col);
-          });
-        }
+      });
+    };
+
+    //挖开一个格子，挖到0格时记入待展开队列
+    const digCell=(row,col)=>{
+      let ret=this.dig(target,row,col);
+      if(-1===ret){
+        failed=true;
+        return ret;
       }
-    }
-
-    //找到周边被标记块数等于当前块雷数的块，然后把周围未标记且未挖开的块挖开
-    for(let row=0; row<rows; row++){
-      for(let col=0; col<cols; col++){
-        let cell=target[row].data[col], counter=cell.value&0x0f;
-        if(VALUE_MINE===counter || !(0xC0 & cell.value) || 0===counter){
-          continue;
-        }
-
-        //当前块周围被标记的块的个数
-        let neighbours=this.getNeighbours(rows,cols,row,col), markCount=0;
-        neighbours.forEach(({row,col})=>{
-          let cell=target[row].data[col];
-          if(0x40&cell.value){
-            markCount++;
-          }
-        });
-
-        //当前块周围被标记的块的个数不等于当前块的雷数
-        if(counter!==markCount){
-          continue;
-        }
-
-        //当前块周围未挖开且未标记的块挖开
-        neighbours.forEach(({row,col})=>{
-          let cell=target[row].data[col];
-          if(!(0xC0&cell.value)){
-            further=true;
-            this.dig(target,row,col);
-          }
-        });
-
-        //挖到雷了
-        if('failed'===this.status){
-          return false;
-        }
+      if(0===ret){
+        return ret;
       }
-    }
+      touch(row,col);
+      if(0===(target[row].data[col].value&0x0f)){
+        pending.push(row*cols+col);
+      }
+      return ret;
+    };
 
-    //子集规则：某个数字格的未知邻居是另一个数字格未知邻居的子集时，用差集推断确定的雷和安全格
-    let {marks, digs} = findCertainActions(target);
-    marks.forEach(({row,col})=>{
+    //标旗后，周围数字格的未知块数发生变化，需要重新检查
+    const markCell=(row,col)=>{
       this.mark(target,row,col);
-      further=true;
-    });
-    digs.forEach(({row,col})=>{
-      if(this.dig(target,row,col)){
-        further=true;
-      }
-    });
+      touch(row,col);
+    };
 
-    return further;
+    //展开待处理的0格，0格周围必然无雷，可以连锁挖开
+    const flushPending=()=>{
+      while(pending.length && !failed){
+        let {row,col}=cellOf(pending.pop());
+        this.getNeighbours(rows,cols,row,col).forEach(({row:row1,col:col1})=>{
+          if(!(0xC0&target[row1].data[col1].value)){
+            digCell(row1,col1);
+          }
+        });
+      }
+    };
+
+    //检查单个数字格：周围未知块全是雷则标旗，已标旗数正好等于雷数则全部挖开
+    const checkCell=(row,col)=>{
+      let cell=target[row].data[col], counter=cell.value&0x0f;
+      if(VALUE_MINE===counter || !(0x80&cell.value)){
+        return;
+      }
+
+      let unopened=[], markCount=0;
+      this.getNeighbours(rows,cols,row,col).forEach(({row:row1,col:col1})=>{
+        let value=target[row1].data[col1].value;
+        if(0x40&value){
+          markCount++;
+        }else if(!(0x80&value)){
+          unopened.push({row:row1,col:col1});
+        }
+      });
+
+      //0格周围没有雷，全部挖开
+      if(0===counter){
+        unopened.forEach(({row,col})=>digCell(row,col));
+        return;
+      }
+
+      if(unopened.length && unopened.length===counter-markCount){
+        //未知块全是雷
+        unopened.forEach(({row,col})=>markCell(row,col));
+      }else if(counter===markCount){
+        //雷已全部标出，其余未知块一定是安全的
+        unopened.forEach(({row,col})=>digCell(row,col));
+      }
+    };
+
+    //上一轮已经推到不动点，这次只有 seed 周围会发生变化；没有 seed 时只能全盘检查一次
+    if(seed){
+      touch(seed.row,seed.col);
+    }else{
+      for(let row=0; row<rows; row++){
+        for(let col=0; col<cols; col++){
+          let value=target[row].data[col].value;
+          if((0x80&value) && VALUE_MINE!==(value&0x0f)){
+            dirty.add(row*cols+col);
+          }
+        }
+      }
+    }
+
+    while(!failed){
+      while(dirty.size && !failed){
+        let id=dirty.values().next().value;
+        dirty.delete(id);
+        let {row,col}=cellOf(id);
+        checkCell(row,col);
+        flushPending();
+      }
+      if(failed){
+        break;
+      }
+
+      //子集规则：某个数字格的未知邻居是另一个数字格未知邻居的子集时，用差集推断确定的雷和安全格
+      let {marks, digs}=findCertainActions(target);
+      if(!marks.length && !digs.length){
+        break;
+      }
+      marks.forEach(({row,col})=>markCell(row,col));
+      digs.forEach(({row,col})=>digCell(row,col));
+      flushPending();
+    }
+
+    //推理过程中挖到雷，说明盘面上的旗子标错了
+    return failed;
   }
   gameFinished(target){
     let rows=target.length, cols=target[0].data.length;
@@ -280,8 +326,13 @@ export default class GamePage extends Component{
         status='failed';
     }
 
-    //处理更多雷
-    while('running'===status && this.autoproc(board)){}
+    //自动推理，一次调用跑到不动点
+    if('running'===status){
+        //推理时挖到雷，说明盘面上的旗子标错了
+        if(this.autoproc(board,data)){
+            status='failed';
+        }
+    }
 
     //当前局面是否完成
     if('running'===status && this.gameFinished(board)){
